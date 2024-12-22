@@ -9,3 +9,5 @@ TODO
     - telescope view of open windows
     - persist window configurations by project using CWD
     - fully integrate with toggleterm
+    - move current buffer into a floating window and back into a split window
+    - a window selection UI like OS window selection view
