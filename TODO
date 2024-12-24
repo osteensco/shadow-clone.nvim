@@ -1,6 +1,6 @@
 TODO
 
-- basic idea is to provide a robust API floating windows
+- basic idea is to provide a robust API for floating windows
     - mostly designed for terminals but useable with any kind of buffer
     - split floating windows
     - navigate between floating windows
@@ -11,3 +11,10 @@ TODO
     - fully integrate with toggleterm
     - move current buffer into a floating window and back into a split window
     - a window selection UI like OS window selection view
+- clean up code
+    - add lua "types"
+        - @class
+        - @fields
+    - add arg and return types
+        - @param
+        - @return
