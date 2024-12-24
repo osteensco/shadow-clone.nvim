@@ -59,15 +59,33 @@ M.create_floating_window = function(opts)
         win = vim.api.nvim_open_win(buf, true, win_config)
     }
 
-    manager.append('float', window)
+    manager.append(window)
 
     return window
 end
 
+-- toggle a floating terminal, creates a new terminal buffer if float.term.last_accessed is nil
+M.toggle_floating_terminal = function()
+    local term = manager.ledger.float.terminal.last_accessed
+    if not vim.api.nvim_win_is_valid(term.win) then
+        term = M.create_floating_window({ buf = term.buf })
+        -- TODO
+        --  - abstract into "terminal start" function
+        if vim.bo[term.buf].buftype ~= "terminal" then
+            vim.cmd.terminal()
+        end
+        manager.update_access(term)
+    else
+        vim.api.nvim_win_hide(term.win)
+    end
+end
+
+
+
 
 -- commands
 vim.api.nvim_create_user_command("SCwindow", M.create_floating_window, { nargs = '?' })
--- vim.api.nvim_create_user_command("SCtoggle", M.toggle_floating_window, { nargs = '?' })
+vim.api.nvim_create_user_command("SCtoggleterm", M.toggle_floating_terminal, { nargs = 0 })
 
 
 
