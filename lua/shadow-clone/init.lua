@@ -80,13 +80,39 @@ M.toggle_floating_terminal = function()
     end
 end
 
+-- move current buffer out into a floating window
+M.move_to_floating_window = function()
+    local buf = vim.api.nvim_get_current_buf()
+    local win = vim.api.nvim_get_current_win()
+    local win_type = vim.fn.win_gettype(win)
+    if win_type ~= "popup" then
+        vim.api.nvim_win_close(win, true)
+        M.create_floating_window({ buf = buf })
+    end
+end
 
+-- hide current floating window
+M.hide_floating_window = function()
+    local win = vim.api.nvim_get_current_win()
+    vim.api.nvim_win_hide(win)
+end
 
+-- toggle last accessed window
+M.toggle_last_accessed_win = function()
+    local win = manager.ledger.float.window.last_accessed
+    if not vim.api.nvim_win_is_valid(win.win) then
+        win = M.create_floating_window({ buf = win.buf })
+    else
+        M.hide_floating_window()
+    end
+end
 
 -- commands
 vim.api.nvim_create_user_command("SCwindow", M.create_floating_window, { nargs = '?' })
 vim.api.nvim_create_user_command("SCtoggleterm", M.toggle_floating_terminal, { nargs = 0 })
-
+vim.api.nvim_create_user_command("SCpop", M.move_to_floating_window, { nargs = 0 })
+vim.api.nvim_create_user_command("SChide", M.hide_floating_window, { nargs = 0 })
+vim.api.nvim_create_user_command("SCtoggle", M.toggle_last_accessed_win, { nargs = 0 })
 
 
 -- setup function

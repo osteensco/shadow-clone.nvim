@@ -11,7 +11,9 @@ TODO
     - fully integrate with toggleterm
     - move current buffer into a floating window and back into a split window
     - a window selection UI like OS window selection view
-- clean up code
+- code improvements
+    - last accessed should just be a stack
+    - window type should be part of window obj
     - add lua "types"
         - @class
         - @fields
