@@ -35,7 +35,7 @@ M.create_floating_window = function(opts)
 
     local pos = utils.get_pos(opts.config.position, opts.config.width, opts.config.height)
 
-    local win_config = opts.win_config or {
+    local win_config = {
         relative = "editor",
         width = opts.config.width,
         height = opts.config.height,
@@ -46,6 +46,7 @@ M.create_floating_window = function(opts)
         -- TODO
         -- need highlight group for background
     }
+    win_config = vim.tbl_deep_extend('force', win_config, opts.win_config)
 
     local buf = opts.buf or -1
     if vim.api.nvim_buf_is_valid(buf) then
@@ -107,12 +108,58 @@ M.toggle_last_accessed_win = function()
     end
 end
 
+-- split floating window horizontally
+M.h_split = function()
+    local win = vim.api.nvim_get_current_win()
+
+    if not utils.is_floating(win) then
+        return
+    end
+
+    -- grab buffer, height, and width
+    local buf = vim.api.nvim_get_current_buf()
+    local win_h = vim.api.nvim_win_get_height(win)
+    local win_w = vim.api.nvim_win_get_width(win)
+
+    local pos = utils.get_pos("center", win_w, win_h)
+
+    -- close window, retain buffer
+    vim.api.nvim_win_hide(win)
+
+    -- open two windows using same buffer
+    -- width is the same for both
+    -- height of windows is original height minus some padding
+    M.create_floating_window({ buf = buf, win_config = { height = math.floor(win_h / 2) - 2 } })
+    M.create_floating_window({ buf = buf, win_config = { height = math.floor(win_h / 2) - 2, row = pos.y + math.floor(win_h / 2) + 4 } })
+end
+
+-- split floating window vertically
+-- TODO
+-- implement v_split
+M.v_split = function()
+    local win = vim.api.nvim_get_current_win()
+    -- grab buffer, height, and width
+    -- close window
+    -- open two windows using same buffer
+    -- height is the same for both
+    -- width of windows is original height minus some padding
+end
+
+
+
+
+
+
+
+
+
 -- commands
 vim.api.nvim_create_user_command("SCwindow", M.create_floating_window, { nargs = '?' })
 vim.api.nvim_create_user_command("SCtoggleterm", M.toggle_floating_terminal, { nargs = 0 })
 vim.api.nvim_create_user_command("SCpop", M.move_to_floating_window, { nargs = 0 })
 vim.api.nvim_create_user_command("SChide", M.hide_floating_window, { nargs = 0 })
 vim.api.nvim_create_user_command("SCtoggle", M.toggle_last_accessed_win, { nargs = 0 })
+vim.api.nvim_create_user_command("SCsplit", M.h_split, { nargs = 0 })
 
 
 -- setup function

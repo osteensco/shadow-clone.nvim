@@ -7,6 +7,7 @@ manager.ledger = {
     -- TODO
     --  - merge terminal and window objects
     --  - convert to a stack, removes the need for last_accessed
+    --  - handle window groups
     float = {
         terminal = {
             array = {},
