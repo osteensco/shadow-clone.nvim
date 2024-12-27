@@ -1,19 +1,23 @@
 TODO
 
-- basic idea is to provide a robust API for floating windows
-    - mostly designed for terminals but useable with any kind of buffer
-    - split floating windows
-    - navigate between floating windows
-    - navigate the 'z' access of windows (floating to non floating and back)
-    - create/manage window groups
-    - telescope view of open windows
-    - persist window configurations by project using CWD
-    - fully integrate with toggleterm
-    - move current buffer into a floating window and back into a split window
-    - a window selection UI like OS window selection view
+- basic idea is to provide a robust API for creating, managing,  and manipulating floating windows
+    - main features:
+        - split floating windows
+        - navigate between floating windows at same level
+        - navigate between and move windows along the 'z' axis
+            - hides window at specific z value
+        - move current buffer into a floating window and back into a non floating split window
+        - create/manage window groups
+        - telescope view of open windows and groups
+        - should be natively integrated with other plugins that manage floating windows and buffer navigation
+            - ex. toggleterm, arrow, harpoon, etc.
+    - potential advanced features:
+        - persist window configurations by project using CWD
+        - a window selection UI like OS window selection view
 - code improvements
+    - ADD TESTS
     - last accessed should just be a stack
-    - window type should be part of window obj
+    - window type should be part of window obj, or accessible via a method
     - add lua "types"
         - @class
         - @fields

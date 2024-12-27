@@ -1,12 +1,19 @@
 local utils = {}
 
 -- returns table containing cols and rows (represented as x, y) neovim uses to anchor window
-utils.get_pos = function(pos, width, height)
+utils.get_pos = function(pos, win, width, height)
+    local winanchor = {}
+    if vim.api.nvim_win_is_valid(win) then
+        winanchor = vim.api.nvim_win_get_position(win)
+    else
+        winanchor = { vim.o.lines, vim.o.columns }
+    end
+
     local opts = {
         center = function(w, h)
             return {
-                x = math.floor((vim.o.columns - w) / 2),
-                y = math.floor((vim.o.lines - h) / 2),
+                x = math.floor((winanchor[2] - w) / 2),
+                y = math.floor((winanchor[1] - h) / 2),
             }
         end,
         -- TODO
@@ -14,9 +21,9 @@ utils.get_pos = function(pos, width, height)
     }
 
     -- call appropriate function based on pos argument
-    local position = opts[pos](width, height)
+    local anchor = opts[pos](width, height)
 
-    return position
+    return anchor
 end
 
 -- determine if a window is floating
