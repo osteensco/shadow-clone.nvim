@@ -3,7 +3,7 @@ TODO
 - basic idea is to provide a robust API for creating, managing,  and manipulating floating windows
 
     - main features:
-        -Xsplit floating windows 
+        [X] split floating windows 
         - multiple splits with single command
         - navigate between floating windows at same level
             - similar to normal window navigation using h,j,k,l

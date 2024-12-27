@@ -30,6 +30,7 @@ M.config = {
 --    opts = { win_config = {}, buf = -1 }
 M.create_floating_window = function(opts)
     opts = opts or {}
+    opts.win_config = opts.win_config or {}
 
     -- set defaults
     opts.config = M.config.float_window
@@ -87,8 +88,8 @@ M.toggle_floating_terminal = function()
     end
 end
 
--- move current buffer out into a floating window
-M.move_to_floating_window = function()
+-- move current buffer into a new floating window (normal -> floating)
+M.bubble_up = function()
     local buf = vim.api.nvim_get_current_buf()
     local win = vim.api.nvim_get_current_win()
     local win_type = vim.fn.win_gettype(win)
@@ -98,6 +99,40 @@ M.move_to_floating_window = function()
     end
 end
 
+-- move current buffer into the last accessed normal window (floating -> normal)
+M.bubble_down = function()
+    local buf = vim.api.nvim_get_current_buf()
+    local win = vim.api.nvim_get_current_win()
+    local win_type = vim.fn.win_gettype(win)
+    if win_type == "popup" then
+        vim.api.nvim_win_close(win, true)
+        vim.api.nvim_set_current_buf(buf)
+    end
+end
+
+-- move current buffer into a horizontal split of the last accessed normal window (floating -> normal)
+M.bubble_down_h = function()
+    local buf = vim.api.nvim_get_current_buf()
+    local win = vim.api.nvim_get_current_win()
+    local win_type = vim.fn.win_gettype(win)
+    if win_type == "popup" then
+        vim.api.nvim_win_close(win, true)
+        vim.cmd("split")
+        vim.api.nvim_set_current_buf(buf)
+    end
+end
+
+-- move current buffer into a vertical split of the last accessed normal window (floating -> normal)
+M.bubble_down_v = function()
+    local buf = vim.api.nvim_get_current_buf()
+    local win = vim.api.nvim_get_current_win()
+    local win_type = vim.fn.win_gettype(win)
+    if win_type == "popup" then
+        vim.api.nvim_win_close(win, true)
+        vim.cmd("vsplit")
+        vim.api.nvim_set_current_buf(buf)
+    end
+end
 -- hide current floating window
 M.hide_floating_window = function()
     local win = vim.api.nvim_get_current_win()
@@ -199,7 +234,10 @@ end
 -- commands
 vim.api.nvim_create_user_command("SCwindow", M.create_floating_window, { nargs = '?' })
 vim.api.nvim_create_user_command("SCtoggleterm", M.toggle_floating_terminal, { nargs = 0 })
-vim.api.nvim_create_user_command("SCpop", M.move_to_floating_window, { nargs = 0 })
+vim.api.nvim_create_user_command("SCbubbleup", M.bubble_up, { nargs = 0 })
+vim.api.nvim_create_user_command("SCbubbledown", M.bubble_down, { nargs = 0 })
+vim.api.nvim_create_user_command("SCbubbledownh", M.bubble_down_h, { nargs = 0 })
+vim.api.nvim_create_user_command("SCbubbledownv", M.bubble_down_v, { nargs = 0 })
 vim.api.nvim_create_user_command("SChide", M.hide_floating_window, { nargs = 0 })
 vim.api.nvim_create_user_command("SCtoggle", M.toggle_last_accessed_win, { nargs = 0 })
 vim.api.nvim_create_user_command("SCsplit", M.h_split, { nargs = '?' })
