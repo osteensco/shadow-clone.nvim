@@ -11,8 +11,10 @@ TODO
             - hides window at specific z index
         - automagic resizing at same z index if a window closes
             - toggleable in config
-        - support continuous manual resizing of floating windows
-            - hold down a key binding to expand/reduce height/width
+        - support continuous manual resizing and movement of floating windows
+            - hold down key bindings to:
+                - expand/reduce height/width
+                - move float horizontally/laterally along current z access
         - move current buffer into a floating window and back into a non floating split window
             - bubbleup / bubbledown
         - create/manage float groups
@@ -23,6 +25,8 @@ TODO
             - ex. toggleterm, arrow, harpoon, etc.
 
     - potential advanced features:
+        - make pretty command that fixes overlapping floats on current z axis
+            - adjust current group's layout by automatically moving and resizing floats
         - persist window configurations by project using CWD
         - a window selection UI like OS window selection view
 
