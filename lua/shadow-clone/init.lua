@@ -106,8 +106,8 @@ end
 M.bubble_up = function()
     local buf = vim.api.nvim_get_current_buf()
     local win = vim.api.nvim_get_current_win()
-    local win_type = vim.fn.win_gettype(win)
-    if win_type ~= "popup" then
+    local count = vim.fn.winnr('$')
+    if not utils.is_floating(win) and count > 1 then
         vim.api.nvim_win_close(win, true)
         M.create_floating_window({ buf = buf, newgroup = true })
     end
@@ -117,11 +117,11 @@ end
 M.bubble_down = function()
     local buf = vim.api.nvim_get_current_buf()
     local win = vim.api.nvim_get_current_win()
-    local win_type = vim.fn.win_gettype(win)
-    if win_type == "popup" then
+    if utils.is_floating(win) then
+        local anchor = vim.api.nvim_win_get_position(win)
         vim.api.nvim_win_close(win, true)
         local group = manager.peak()
-        manager.remove_from_group(group, { bufnr = buf, win = win })
+        manager.remove_from_group(group, { bufnr = buf, win = win, anchor = { x = anchor[1], y = anchor[2] } })
         vim.api.nvim_set_current_buf(buf)
     end
 end
@@ -130,11 +130,11 @@ end
 M.bubble_down_h = function()
     local buf = vim.api.nvim_get_current_buf()
     local win = vim.api.nvim_get_current_win()
-    local win_type = vim.fn.win_gettype(win)
-    if win_type == "popup" then
+    if utils.is_floating(win) then
+        local anchor = vim.api.nvim_win_get_position(win)
         vim.api.nvim_win_close(win, true)
         local group = manager.peak()
-        manager.remove_from_group(group, { bufnr = buf, win = win })
+        manager.remove_from_group(group, { bufnr = buf, win = win, anchor = { x = anchor[1], y = anchor[2] } })
         vim.cmd("split")
         vim.api.nvim_set_current_buf(buf)
     end
@@ -144,11 +144,11 @@ end
 M.bubble_down_v = function()
     local buf = vim.api.nvim_get_current_buf()
     local win = vim.api.nvim_get_current_win()
-    local win_type = vim.fn.win_gettype(win)
-    if win_type == "popup" then
+    if utils.is_floating(win) then
+        local anchor = vim.api.nvim_win_get_position(win)
         vim.api.nvim_win_close(win, true)
         local group = manager.peak()
-        manager.remove_from_group(group, { bufnr = buf, win = win })
+        manager.remove_from_group(group, { bufnr = buf, win = win, anchor = { x = anchor[1], y = anchor[2] } })
         vim.cmd("vsplit")
         vim.api.nvim_set_current_buf(buf)
     end

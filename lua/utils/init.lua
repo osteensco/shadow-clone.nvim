@@ -1,9 +1,17 @@
 local utils = {}
 
--- returns table containing cols and rows (represented as x, y) neovim uses to anchor window
+-- ---@enum WindowPosition
+-- local position = {
+--     center = "center"
+-- }
+
+-- Generates an anchor for a window based on position, height, and width.
+-- Anchor is a table containing cols and rows (represented as x, y) that neovim uses to anchor a window.
 utils.get_pos = function(pos, win, width, height)
     local winanchor = {}
-    if vim.api.nvim_win_is_valid(win) then
+    -- TODO
+    --  - remove valid window option if it never gets used anywhere
+    if vim.api.nvim_win_is_valid(win) then -- currently, this portion isn't getting used
         winanchor = vim.api.nvim_win_get_position(win)
     else
         winanchor = { vim.o.lines, vim.o.columns }
@@ -26,7 +34,9 @@ utils.get_pos = function(pos, win, width, height)
     return anchor
 end
 
--- determine if a window is floating
+---Determine if a window is floating.
+---@param window number The window ID.
+---@return boolean
 utils.is_floating = function(window)
     local win_type = vim.fn.win_gettype(window)
     if win_type == "popup" then
@@ -36,7 +46,9 @@ utils.is_floating = function(window)
     return false
 end
 
--- determine if a window is a terminal
+---Determine if a window is a terminal.
+---@param window number The window ID.
+---@return boolean
 utils.is_terminal = function(window)
     local buf_type = vim.bo[window].buftype
     if buf_type == "terminal" then

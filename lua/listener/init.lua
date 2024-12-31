@@ -1,3 +1,4 @@
 -- TODO
 --  - implement floating window open/close listener
 --  - use listener to add/remove floating windows from manager's ledger
+--  - how to handle something like telescope picker?

@@ -1,9 +1,13 @@
 -- shadow clone manager
 
+---@class Anchor
+---@field x number
+---@field y number
 
 ---@class WinObj
 ---@field bufnr number buffer number of a floating window
 ---@field win number window ID of a floating window
+---@field anchor Anchor x, y coordinates that represents the window's anchor
 
 ---@class WinGroup
 ---@field windows table<WinObj>
@@ -17,7 +21,6 @@ local manager = {}
 -- Floating windows are always part of a group, the stack represents the group's relative position on the z axis.
 -- There are some assumptions with the stack:
 --  - The stack should roughly correspond to the zindex of a window. The top of the stack having the highest z index.
---  -
 manager.stack = {}
 -- TODO
 --  - Handle hidden buffers.
