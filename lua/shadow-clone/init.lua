@@ -81,7 +81,7 @@ M.create_floating_window = function(opts)
         group = manager.pop()
     end
     manager.add_to_group(group, window)
-    manager.push(group)
+    manager.push(group, window)
 
     return window
 end
