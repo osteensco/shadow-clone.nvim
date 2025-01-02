@@ -8,24 +8,29 @@
 ---@field anchor Anchor x, y coordinates that represents the window's anchor
 
 ---@class WinGroup
----@field members table<WinObj>
+---@field members WinObj[]
 ---@field zindex number
 
 ---@class Data
 ---@field stack WinGroup[]
 ---@field hidden WinGroup[]
-local data = {}
 
--- Manager's main stack containing floating windows.
--- Floating windows are always part of a group, the stack represents the group's relative position on the z axis.
--- There are some assumptions with the stack:
---  - The stack should exactly correspond to the zindex of a window. The top of the stack having the highest z index.
---  - The stack will provide a more standardized way to set and manage zindex's of all floating windows.
---  - When a push operation occurs, the group is pushed onto the stack and the member that triggered the push will be provided to this function.
-data.stack = {}
+---@type Data
+local data = {
 
--- Manage hidden buffers
-data.hidden = {}
+    -- Manager's main stack containing floating windows.
+    -- Floating windows are always part of a group, the stack represents the group's relative position on the z axis.
+    -- There are some assumptions with the stack:
+    --  - The stack should exactly correspond to the zindex of a window. The top of the stack having the highest z index.
+    --  - The stack will provide a more standardized way to set and manage zindex's of all floating windows.
+    --  - When a push operation occurs, the group is pushed onto the stack and the member that triggered the push will be provided to this function.
+    stack = {},
+
+    -- Manage hidden buffers
+    hidden = {}
+
+}
+
 
 
 
@@ -46,6 +51,7 @@ ops.push = function(group, win)
     local length = ops.get_len()
     local zindex = 1
     data.stack[length + 1] = group
+    -- table.insert(data.stack, group)
 
     if length ~= 0 then
         zindex = data.stack[length].zindex + 1
@@ -113,7 +119,10 @@ end
 ---@param group WinGroup
 ---@param window WinObj
 ops.add_to_group = function(group, window)
-    group = group or ops.new_group()
+    assert(group.members,
+        "A group attempting to be added to should have two fields (members, zindex), got - " .. vim.inspect(group))
+    assert(group.zindex,
+        "A group attempting to be added to should have two fields (members, zindex), got - " .. vim.inspect(group))
     table.insert(group.members, window)
 end
 
