@@ -22,7 +22,7 @@ nav.bubble_down = function()
     local win = vim.api.nvim_get_current_win()
     if utils.is_floating(win) then
         local anchor = vim.api.nvim_win_get_position(win)
-        local group = manager.peak()
+        local group = manager.peek()
         assert(#group == 0,
             "Expected WinGroup{members, zindex} got " .. vim.inspect(group) .. "length: " .. manager.get_len())
         manager.remove_from_group(group, { bufnr = buf, win = win, anchor = { x = anchor[1], y = anchor[2] } })
@@ -38,7 +38,7 @@ nav.bubble_down_h = function()
     if utils.is_floating(win) then
         local anchor = vim.api.nvim_win_get_position(win)
         vim.api.nvim_win_close(win, true)
-        local group = manager.peak()
+        local group = manager.peek()
         manager.remove_from_group(group, { bufnr = buf, win = win, anchor = { x = anchor[1], y = anchor[2] } })
         vim.cmd("split")
         vim.api.nvim_set_current_buf(buf)
@@ -52,11 +52,17 @@ nav.bubble_down_v = function()
     if utils.is_floating(win) then
         local anchor = vim.api.nvim_win_get_position(win)
         vim.api.nvim_win_close(win, true)
-        local group = manager.peak()
+        local group = manager.peek()
         manager.remove_from_group(group, { bufnr = buf, win = win, anchor = { x = anchor[1], y = anchor[2] } })
         vim.cmd("vsplit")
         vim.api.nvim_set_current_buf(buf)
     end
+end
+
+-- Move to the closest left window in the same group.
+-- Moves to the rightmost if current window is the leftmost of the group.
+nav.move_left = function()
+    local group = manager.peek
 end
 
 

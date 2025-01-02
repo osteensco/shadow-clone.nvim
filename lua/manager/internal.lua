@@ -63,9 +63,9 @@ ops.pop = function()
     return group
 end
 
----peak at the top of the manager's stack
+---peek at the top of the manager's stack
 ---@return WinGroup
-ops.peak = function()
+ops.peek = function()
     local length = ops.get_len()
     if length < 1 then
         return {}
