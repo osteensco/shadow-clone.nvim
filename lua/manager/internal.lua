@@ -145,9 +145,9 @@ ops.remove_from_group = function(group, window)
     --  - handle not finding the window object in the group
 end
 
-
+---@return string
 ops.inspect = function()
-    print(vim.inspect(data.stack))
+    return vim.inspect(data.stack)
 end
 
 return ops
