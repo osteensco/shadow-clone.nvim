@@ -1,4 +1,6 @@
 -- TODO
 --  - implement floating window open/close listener
 --  - use listener to add/remove floating windows from manager's ledger
---  - how to handle something like telescope picker?
+--  - figure out:
+--      - how to distinguish shadow-clone's create floating window vs other sources
+--      - how to handle something like telescope picker?

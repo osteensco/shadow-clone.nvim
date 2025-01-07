@@ -7,6 +7,7 @@
 
 ---@class Config Settings passed to setup function that shadow-clone.nvim uses.
 ---@field float_window? FloatConfig
+---@field DEBUG? boolean
 local config = {
     float_window = {
         position = 'center',
@@ -15,6 +16,7 @@ local config = {
         width = math.ceil(math.min(vim.o.columns, math.max(80, vim.o.columns - 10))),
         height = math.ceil(math.min(vim.o.lines, math.max(20, vim.o.lines - 5))),
     },
+    DEBUG = false,
 }
 
 return config

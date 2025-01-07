@@ -15,21 +15,25 @@
 ---@field stack WinGroup[]
 ---@field hidden WinGroup[]
 
+---@return Data
+local function init_mngr()
+    return {
+
+        -- Manager's main stack containing floating windows.
+        -- Floating windows are always part of a group, the stack represents the group's relative position on the z axis.
+        -- There are some assumptions with the stack:
+        --  - The stack should exactly correspond to the zindex of a window. The top of the stack having the highest z index.
+        --  - The stack will provide a more standardized way to set and manage zindex's of all floating windows.
+        --  - When a push operation occurs, the group is pushed onto the stack and the member that triggered the push will be provided to this function.
+        stack = {},
+
+        -- Manage hidden buffers
+        hidden = {}
+    }
+end
+
 ---@type Data
-local data = {
-
-    -- Manager's main stack containing floating windows.
-    -- Floating windows are always part of a group, the stack represents the group's relative position on the z axis.
-    -- There are some assumptions with the stack:
-    --  - The stack should exactly correspond to the zindex of a window. The top of the stack having the highest z index.
-    --  - The stack will provide a more standardized way to set and manage zindex's of all floating windows.
-    --  - When a push operation occurs, the group is pushed onto the stack and the member that triggered the push will be provided to this function.
-    stack = {},
-
-    -- Manage hidden buffers
-    hidden = {}
-
-}
+local data = init_mngr()
 
 
 
@@ -46,8 +50,7 @@ end
 ---When this function is called there should always be a new member associated with that group.
 ---This is either the first member or the latest addition. Either way it will always be pushed onto the stack.
 ---@param group WinGroup
----@param win WinObj
-ops.push = function(group, win)
+ops.push = function(group)
     local length = ops.get_len()
     local zindex = 1
     data.stack[length + 1] = group
@@ -58,7 +61,10 @@ ops.push = function(group, win)
     end
 
     group.zindex = zindex
-    vim.api.nvim_win_set_config(win.win, { zindex = zindex })
+
+    for _, win in ipairs(group) do
+        vim.api.nvim_win_set_config(win, { zindex = zindex })
+    end
 end
 
 ---pop a group off the manager's stack
@@ -148,6 +154,11 @@ end
 ---@return string
 ops.inspect = function()
     return vim.inspect(data.stack)
+end
+
+---Removes all floating windows from shadow-clone's data structure.
+ops.clear = function()
+    data = init_mngr()
 end
 
 return ops

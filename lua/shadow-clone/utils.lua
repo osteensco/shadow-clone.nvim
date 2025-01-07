@@ -1,3 +1,4 @@
+local config = require("shadow-clone.config")
 local utils = {}
 
 -- ---@enum WindowPosition
@@ -74,7 +75,17 @@ utils.get_types = function(window)
     return win_type, buf_type
 end
 
-
+-- Display information helpful to debuggin on floating windows.
+utils.debug_display = function(grp, window)
+    if config.DEBUG then
+        local testconfig = {
+            title = "group: " ..
+                grp.zindex .. " win: " .. window.win .. " - x: " .. window.anchor[2] .. ", y: " .. window.anchor[1],
+            title_pos = "center"
+        }
+        vim.api.nvim_win_set_config(window.win, testconfig)
+    end
+end
 
 
 return utils
