@@ -2,13 +2,13 @@ local manager = require('manager')
 local mock = require('luassert.mock')
 local api = mock(vim.api, true)
 
-describe('Manager Tests - ', function()
+describe('Manager Module - ', function()
     -- used to set clean state before each test
     before_each(function()
         manager.clear()
     end)
 
-    it('push() should push a new group with the correct zindex', function()
+    it('manager.push() should push a new group with the correct zindex', function()
         local group = manager.new_group()
 
         manager.push(group)
@@ -18,7 +18,7 @@ describe('Manager Tests - ', function()
         assert.are.same(group.zindex, 1)
     end)
 
-    it('peek() should peek the top group without removing it', function()
+    it('manager.peek() should peek the top group without removing it', function()
         local group1 = manager.new_group()
         manager.push(group1)
 
@@ -31,7 +31,7 @@ describe('Manager Tests - ', function()
         assert.are.same(manager.get_len(), 2)
     end)
 
-    it('pop() should pop the top group', function()
+    it('manager.pop() should pop the top group', function()
         local group1 = manager.new_group()
         manager.push(group1)
 
@@ -45,7 +45,7 @@ describe('Manager Tests - ', function()
     end)
 
 
-    it('swap() should swap the top two groups', function()
+    it('manager.swap() should swap the top two groups', function()
         local group1 = manager.new_group()
         local win1 = { bufnr = 1, win = 2, anchor = { x = 0, y = 0 } }
         manager.push(group1)
@@ -62,7 +62,7 @@ describe('Manager Tests - ', function()
         assert.are.same(manager.inspect(), vim.inspect(stack))
     end)
 
-    it('cycle() should cycle a group to the bottom of the stack and adjust zindex', function()
+    it('manager.cycle() should cycle a group to the bottom of the stack and adjust zindex', function()
         local group1 = manager.new_group()
         local win1 = { bufnr = 1, win = 2, anchor = { x = 0, y = 0 } }
         manager.push(group1)
@@ -84,7 +84,7 @@ describe('Manager Tests - ', function()
         assert.are.same(manager.inspect(), vim.inspect(stack))
     end)
 
-    it('add_to_group() should add a window to a group', function()
+    it('manager.add_to_group() should add a window to a group', function()
         local group = manager.new_group()
         local win = { bufnr = 1, win = 2, anchor = { x = 0, y = 0 } }
 
@@ -94,7 +94,7 @@ describe('Manager Tests - ', function()
         assert.are.same(group.members[1], win)
     end)
 
-    it('remove_from_group() should remove a window from a group', function()
+    it('manager.remove_from_group() should remove a window from a group', function()
         local group = manager.new_group()
         local win1 = { bufnr = 1, win = 2, anchor = { x = 0, y = 0 } }
         local win2 = { bufnr = 3, win = 4, anchor = { x = 10, y = 10 } }

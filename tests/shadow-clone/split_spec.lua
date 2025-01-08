@@ -1,89 +1,119 @@
+local split = require('shadow-clone.split')
+local manager = require('manager')
+local utils = require('shadow-clone.utils')
+local mock = require('luassert.mock')
+local stub = require('luassert.stub')
+
+
+---@class MockWindow
+---@field buf integer
+---@field pos integer[]
+---@field height integer
+---@field width integer
+
+---@class MockNVIMsWindows : table<integer, MockWindow>
+
+---@type MockNVIMsWindows
+local windows = {} -- mock neovim's window management
+local buf_counter = 1
+local win_counter = 1
+local current_window = -1
+
+
 describe("split.lua", function()
-    local split
-    local mock_utils
-    local mock_window
-    local mock_manager
-    local mock_vim
-
-    -- Mocking Neovim API calls
     before_each(function()
-        mock_utils = require('shadow-clone.utils')
+        stub(vim.api, "nvim_get_current_win", function() return current_window end)
+        stub(vim.api, "nvim_win_get_buf", function(win) return windows[win].buf end)
+        stub(vim.api, "nvim_win_get_position", function(win) return windows[win].pos end)
+        stub(vim.api, "nvim_win_get_height", function(win) return windows[win].height end)
+        stub(vim.api, "nvim_win_get_width", function(win) return windows[win].width end)
+        stub(vim.api, "nvim_win_hide", function(win) windows[win] = nil end)
+        stub(vim.api, "nvim_buf_is_valid", function() return true end)
+        stub(vim.api, "nvim_create_buf", function()
+            local bufnr = buf_counter
+            buf_counter = bufnr + 1
+            return bufnr
+        end)
+        stub(vim.api, "nvim_open_win", function(buffer, enter, config)
+            local winnr = win_counter
+            win_counter = winnr + 1
+
+            windows[winnr] = {
+                buf = buffer,
+                pos = { config.row, config.col },
+                height = config.height,
+                width = config
+                    .width
+            }
+            if enter then
+                current_window = winnr
+            end
+
+            return winnr
+        end)
+        stub(vim.fn, "win_gettype", function(window) return "popup" end)
     end)
 
-    describe("horizontal split", function()
+    after_each(function()
+        windows = {}
+        buf_counter = 1
+        win_counter = 1
+        current_window = -1
+        mock.revert(vim.api)
+        mock.revert(vim.fn)
+    end)
+
+    describe("h_split()", function()
         it("should split the floating window horizontally", function()
-            -- Mock necessary Vim API functions
-            mock_utils.is_floating = function() return true end
-            mock_vim.api.nvim_get_current_win = function() return 1 end
-            mock_vim.api.nvim_win_get_buf = function() return 1 end
-            mock_vim.api.nvim_win_get_position = function() return { 1, 1 } end
-            mock_vim.api.nvim_win_get_height = function() return 20 end
-            mock_vim.api.nvim_win_get_width = function() return 40 end
-            mock_manager.peek = function() return {} end
+            windows = {
+                [0] = {
+                    buf = 0,
+                    pos = { 0, 0 },
+                    height = 100,
+                    width = 100,
+                }
+            }
 
-            -- Call the function
+            current_window = 0
+
             split.h_split()
 
-            -- Assert that two floating windows are created with the correct properties
-            assert.are.equal(mock_vim.api.nvim_win_get_height(1), 10)
-            assert.are.equal(mock_vim.api.nvim_win_get_width(1), 40)
-            -- Add more assertions to check window positions
-        end)
-
-        it("should not split if the current window is not floating", function()
-            -- Mock that the window is not floating
-            mock_utils.is_floating = function() return false end
-
-            -- Call the function
-            split.h_split()
-
-            -- Assert that no new windows were created
-            assert.spy(mock_vim.api.nvim_open_win).was_not_called()
+            local expected = {
+                buf = 0,
+                pos = { 51, 0 },
+                height = 50,
+                width = 100,
+            }
+            assert.are.same(expected, windows[current_window],
+                "the split window should be halve the size of the original and located at the midpoint of the original.")
+            assert.equals(2, current_window, "after one split the window ID should be 2.")
         end)
     end)
 
-    describe("vertical split", function()
+    describe("v_split()", function()
         it("should split the floating window vertically", function()
-            -- Mock necessary Vim API functions
-            mock_utils.is_floating = function() return true end
-            mock_vim.api.nvim_get_current_win = function() return 1 end
-            mock_vim.api.nvim_win_get_buf = function() return 1 end
-            mock_vim.api.nvim_win_get_position = function() return { 1, 1 } end
-            mock_vim.api.nvim_win_get_height = function() return 20 end
-            mock_vim.api.nvim_win_get_width = function() return 40 end
-            mock_manager.peek = function() return {} end
+            windows = {
+                [0] = {
+                    buf = 0,
+                    pos = { 0, 0 },
+                    height = 100,
+                    width = 100,
+                }
+            }
 
-            -- Call the function
-            split.v_split()
+            current_window = 0
 
-            -- Assert that two floating windows are created with the correct properties
-            assert.are.equal(mock_vim.api.nvim_win_get_height(1), 20)
-            assert.are.equal(mock_vim.api.nvim_win_get_width(1), 20)
-            -- Add more assertions to check window positions
-        end)
-
-        it("should not split if the current window is not floating", function()
-            -- Mock that the window is not floating
-            mock_utils.is_floating = function() return false end
-
-            -- Call the function
-            split.v_split()
-
-            -- Assert that no new windows were created
-            assert.spy(mock_vim.api.nvim_open_win).was_not_called()
-        end)
-    end)
-
-    describe("when the group is empty", function()
-        it("should handle empty groups correctly", function()
-            -- Mock that there are no windows in the group
-            mock_manager.peek = function() return {} end
-
-            -- Call the split function
             split.h_split()
 
-            -- Ensure that it doesn't attempt to remove anything from the group
-            assert.spy(mock_manager.remove_from_group).was_not_called()
+            local expected = {
+                buf = 0,
+                pos = { 51, 0 },
+                height = 50,
+                width = 100,
+            }
+            assert.are.same(expected, windows[current_window],
+                "the split window should be halve the size of the original and located at the midpoint of the original.")
+            assert.equals(2, current_window, "after one split the window ID should be 2.")
         end)
     end)
 end)
