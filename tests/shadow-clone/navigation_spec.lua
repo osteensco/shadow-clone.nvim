@@ -5,38 +5,75 @@ local manager = require('manager')
 local mock = require('luassert.mock')
 local stub = require('luassert.stub')
 
-describe('navigation.lua', function()
-    local current_win, current_buf
 
+
+local current_win = 1
+local current_buf = 2
+local buf_counter = 1
+local win_counter = 1
+local windows = {} -- mock neovim's window management
+
+
+
+describe('navigation.lua', function()
     before_each(function()
         current_win = 1
         current_buf = 2
+        buf_counter = 1
+        win_counter = 1
 
+        --TODO
+        -- - create proper mocks
+        -- - add helper vars
+        -- - figure out how to mock tracking normal windows
 
+        stub(vim.fn, 'winnr', function() return 2 end)
         stub(vim.api, 'nvim_get_current_win', function() return current_win end)
         stub(vim.api, 'nvim_get_current_buf', function() return current_buf end)
+
+        stub(vim.api, 'nvim_buf_is_valid', function(bufnr) return true end)
+        stub(vim.api, "nvim_create_buf", function()
+            local bufnr = buf_counter
+            buf_counter = bufnr + 1
+            return bufnr
+        end)
+        stub(vim.api, "nvim_open_win", function(buffer, enter, config)
+            local winnr = win_counter
+            win_counter = winnr + 1
+
+            windows[winnr] = config
+            windows[winnr].buf = buffer
+
+            return winnr
+        end)
+
         stub(vim.api, 'nvim_set_current_win')
-        stub(vim.api, 'nvim_win_get_position', function() return { 1, 1 } end) -- Position mock
-        stub(vim.api, 'nvim_win_get_height', function() return 10 end)         -- Mock height
-        stub(vim.api, 'nvim_win_get_width', function() return 10 end)          -- Mock width
-        stub(vim.api, 'nvim_win_close')
-        stub(vim.api, 'nvim_set_current_buf')
+        stub(vim.api, 'nvim_win_get_position', function() return { 1, 1 } end)
+        stub(vim.api, 'nvim_win_get_height', function() return 10 end)
+        stub(vim.api, 'nvim_win_get_width', function() return 10 end)
+        stub(vim.api, 'nvim_win_close', function() end)
+        stub(vim.api, 'nvim_set_current_buf', function() end)
     end)
 
     after_each(function()
         mock.revert(vim.api)
+        mock.revert(vim.fn)
+        mock.revert(utils)
     end)
 
     -- bubble functions care about:
     --  - adding and removing from the stack
     --  - transfering the current buffer successfully
-    --      - will need to mock window being removed (along with buffer)
-    --      - how to mock tracking normal windows and their buffers?
     describe('bubble_up()', function()
+        stub(utils, 'is_floating', function() return false end)
+
         it('should move buffer to a floating window', function()
             nav.bubble_up()
-            -- assert stack has a group with window in it
-            --  - buffer of window in group should equal original buffer
+
+            assert.equals(1, manager.get_len())
+            local grp = manager.peek()
+            assert.equals(1, #grp.members)
+            assert.equals(windows[1].buf, grp.members[1].bufnr)
         end)
     end)
 

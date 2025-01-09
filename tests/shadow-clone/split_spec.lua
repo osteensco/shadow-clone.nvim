@@ -1,6 +1,4 @@
 local split = require('shadow-clone.split')
-local manager = require('manager')
-local utils = require('shadow-clone.utils')
 local mock = require('luassert.mock')
 local stub = require('luassert.stub')
 

@@ -86,9 +86,9 @@ local function move_to_closest(get_distance, is_closest, is_farthest)
         for _, win in ipairs(group.members) do
             if win.win ~= curr_win then
                 local distance = get_distance(curr_pos, win.anchor)
-                if is_closest(distance) then
+                if is_closest(distance, closest) then
                     closest = { distance = distance, winnr = win.win }
-                elseif is_farthest(distance) then
+                elseif is_farthest(distance, farthest) then
                     farthest = { distance = distance, winnr = win.win }
                 end
             end
