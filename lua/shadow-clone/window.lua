@@ -85,25 +85,12 @@ end
 
 
 
---TODO
--- - rework hide and toggle functions
--- - how to handle hidden buffers (hidden stack?)
 
--- hide current floating window
--- M.hide_floating_window = function()
---     local win = vim.api.nvim_get_current_win()
---     vim.api.nvim_win_hide(win)
--- end
---
--- -- toggle last accessed window
--- M.toggle_last_accessed_win = function()
---     local win = manager.ledger.float.window.last_accessed
---     if not vim.api.nvim_win_is_valid(win.win) then
---         win = M.create_floating_window({ buf = win.buf })
---     else
---         M.hide_floating_window()
---     end
--- end
+-- TODO
+--  - use these to implement hide and toggle
+-- manager.hide_top_group
+-- manager.toggle_last_accessed_group
+
 
 
 

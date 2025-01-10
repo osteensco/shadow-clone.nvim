@@ -28,7 +28,12 @@ local function init_mngr()
         stack = {},
 
         -- Manage hidden buffers
-        hidden = {}
+        -- TODO
+        --  - implement hidden stack operations
+        hidden = {
+            stack = {},
+            toggle = {}
+        }
     }
 end
 
@@ -39,6 +44,8 @@ local data = init_mngr()
 
 
 local ops = {}
+
+---Main Stack Operations
 
 ---get length of the manager's stack
 ---@return number
@@ -105,6 +112,8 @@ end
 ops.cycle = function()
     local top = ops.pop()
     table.insert(data.stack, 1, top)
+    -- TODO
+    --  - verify this loop isn't needed
     for i, g in ipairs(data.stack) do
         if i ~= 1 then
             g.zindex = g.zindex + 1
@@ -113,6 +122,71 @@ ops.cycle = function()
         end
     end
 end
+
+---moves bottom group to the top of the stack, and shifts all other groups down one.
+ops.cycle_backwards = function()
+    local bottom = table.remove(data.stack, 1)
+    ops.push(bottom)
+end
+
+
+
+---Hidden stack operations
+
+ops.hidden_get_len = function()
+    return #data.hidden.stack + #data.hidden.toggle
+end
+
+ops.hidden_toggle_occupied = function()
+    assert(#data.hidden.toggle < 2,
+        "the toggle slot in the hidden stack should never be more than 1. data.hidden.toggle - ",
+        vim.inspect(data.hidden.toggle))
+
+    if #data.hidden.toggle == 0 then
+        return false
+    end
+
+    return true
+end
+
+ops.hidden_pop = function()
+    local group
+    local length = ops.hidden_get_len()
+
+    if not ops.hidden_toggle_occupied() then
+        group = table.remove(data.hidden.stack, length)
+    else
+        group = table.remove(data.hidden.toggle, 1)
+    end
+
+    return group
+end
+
+---hide highest zindex group
+ops.hide_top_group = function()
+    local group = ops.pop()
+    group.zindex = 0
+    table.insert(data.hidden.stack, group)
+end
+
+---toggle last accessed group
+ops.toggle_last_accessed_group = function()
+    local group
+
+    if ops.hidden_toggle_occupied() then
+        group = ops.hidden_pop()
+        ops.push(group)
+        return
+    end
+
+    group = ops.pop()
+    group.zindex = 0
+    table.insert(data.hidden.toggle, group)
+end
+
+
+
+--- Group Manipulation
 
 ---creates a new WinGroup
 ---@return WinGroup
@@ -162,9 +236,20 @@ ops.remove_from_group = function(group, window)
     end
 end
 
+
+-- Helpers
+
 ---@return string
 ops.inspect = function()
     return vim.inspect(data.stack)
+end
+
+---@return table<string, string>
+ops.hidden_inspect = function()
+    return {
+        stack = vim.inspect(data.hidden.stack),
+        toggle = vim.inspect(data.hidden.toggle)
+    }
 end
 
 ---Removes all floating windows from shadow-clone's data structure.

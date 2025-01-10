@@ -3,6 +3,7 @@ local split = require("shadow-clone.split")
 local default_config = require("shadow-clone.config")
 local commands = require("shadow-clone.commands")
 local keymaps = require("shadow-clone.keymaps")
+local utils = require("shadow-clone.utils")
 
 
 local M = {}
@@ -13,7 +14,8 @@ M.config = default_config
 M.navigation = navigation
 M.split = split
 M.debug = {
-    inspect = require('manager').inspect
+    inspect = utils.inspect,
+    inspect_hidden = utils.hidden_inspect,
 }
 
 -- setup function

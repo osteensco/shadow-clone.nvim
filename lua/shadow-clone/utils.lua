@@ -1,4 +1,7 @@
 local config = require("shadow-clone.config")
+local manager = require('manager')
+
+
 local utils = {}
 
 -- ---@enum WindowPosition
@@ -86,6 +89,11 @@ utils.debug_display = function(grp, window)
         vim.api.nvim_win_set_config(window.win, testconfig)
     end
 end
+
+utils.inspect = manager.inspect
+utils.inspect_hidden = manager.hidden_inspect
+
+
 
 
 return utils

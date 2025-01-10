@@ -2,11 +2,15 @@ local manager = require('manager')
 local mock = require('luassert.mock')
 local api = mock(vim.api, true)
 
-describe('Manager Module - ', function()
+describe('manager/internal.lua', function()
     -- used to set clean state before each test
     before_each(function()
         manager.clear()
     end)
+
+
+
+    -- Main Stack Operations
 
     it('manager.push() should push a new group with the correct zindex', function()
         local group = manager.new_group()
@@ -83,6 +87,84 @@ describe('Manager Module - ', function()
         local stack = { group3, group1, group2 }
         assert.are.same(manager.inspect(), vim.inspect(stack))
     end)
+
+
+
+    -- Hidden Stack Operations
+
+    it('manager.hidden_get_len() should return length of the hidden stack.', function()
+        local group = manager.new_group()
+        manager.push(group)
+        manager.push(group)
+        manager.hide_top_group()
+        manager.hide_top_group()
+
+        assert.are.same(2, manager.hidden_get_len())
+    end)
+
+    it('manager.hidden_toggle_occupied() should accuratley reflect if the toggle slot is occupied or not.', function()
+        local group = manager.new_group()
+        manager.push(group)
+
+
+        manager.toggle_last_accessed_group()
+
+        assert(manager.hidden_toggle_occupied(), "toggle slot should be occupied after first function call.")
+        assert.are.same(vim.inspect({ group }), manager.hidden_inspect().toggle,
+            "toggle slot group should be the group we initialized after first function call.")
+
+        manager.toggle_last_accessed_group()
+
+        assert(not manager.hidden_toggle_occupied(), "toggle slot should not be occupied after second function call.")
+        assert.are.same('{}', manager.hidden_inspect().toggle,
+            "toggle slot should not be occupied after second function call.")
+    end)
+
+    it('manager.hidden_pop() should pop the top group off the hidden stack.', function()
+        local group = manager.new_group()
+        manager.push(group)
+        manager.hide_top_group()
+
+
+        grp = manager.hidden_pop()
+
+
+        assert.are.same(group, grp)
+        assert.equals(0, manager.get_len())
+        assert.equals(0, manager.hidden_get_len())
+    end)
+
+    it('manager.hide_top_group() should remove the top group from the main stack and push it onto the hidden stack.',
+        function()
+            local group = manager.new_group()
+            manager.push(group)
+
+
+            manager.hide_top_group()
+
+
+            assert.equals(1, manager.hidden_get_len())
+            assert.equals(0, manager.get_len())
+        end)
+
+    it(
+        'manager.toggle_last_accessed_group() should successfully move a group between the toggle slot and the top of the main stack.',
+        function()
+            local group = manager.new_group()
+            manager.push(group)
+
+
+            manager.toggle_last_accessed_group()
+            assert(manager.hidden_toggle_occupied(), "toggle slot should be occupied after first function call.")
+
+            manager.toggle_last_accessed_group()
+            assert(not manager.hidden_toggle_occupied(), "toggle slot should not be occupied after second function call.")
+        end)
+
+
+
+
+    -- Group Manipulation
 
     it('manager.add_to_group() should add a window to a group', function()
         local group = manager.new_group()
