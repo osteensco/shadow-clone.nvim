@@ -21,11 +21,10 @@ nav.bubble_down = function()
     local buf = vim.api.nvim_get_current_buf()
     local win = vim.api.nvim_get_current_win()
     if utils.is_floating(win) then
-        local anchor = vim.api.nvim_win_get_position(win)
         local group = manager.peek()
         assert(next(group),
             "Peek should not return an empty table when a floating window exists.")
-        manager.remove_from_group(group, { bufnr = buf, win = win, anchor = { x = anchor[1], y = anchor[2] } })
+        manager.remove_from_group(group, { bufnr = buf, win = win })
         vim.api.nvim_win_close(win, true)
         vim.api.nvim_set_current_buf(buf)
     end
@@ -83,6 +82,8 @@ local function move_to_closest(get_distance, is_closest, is_farthest)
         ---@type WindowDistance
         local closest, farthest = nil, nil
         local curr_pos = vim.api.nvim_win_get_position(curr_win)
+        assert(curr_pos ~= nil, "curr_pos should never be nil. - curr_win: " .. curr_win)
+
         for _, win in ipairs(group.members) do
             if win.win ~= curr_win then
                 local distance = get_distance(curr_pos, win.anchor)
@@ -108,7 +109,10 @@ nav.move_left = function()
     move_to_closest(
         function(curr_pos, anchor_pos) return curr_pos[2] - anchor_pos[2] end,
         function(distance, closest) return distance > 0 and (not closest or closest.distance > distance) end,
-        function(distance, farthest) return distance < 0 and (not farthest or farthest.distance < distance) end
+        function(distance, farthest)
+            return (distance < 0 or not farthest or math.abs(distance) > math.abs(farthest.distance))
+        end
+
     )
 end
 
@@ -116,23 +120,29 @@ nav.move_right = function()
     move_to_closest(
         function(curr_pos, anchor_pos) return curr_pos[2] - anchor_pos[2] end,
         function(distance, closest) return distance < 0 and (not closest or closest.distance < distance) end,
-        function(distance, farthest) return distance > 0 and (not farthest or farthest.distance > distance) end
+        function(distance, farthest)
+            return (distance < 0 or not farthest or math.abs(distance) > math.abs(farthest.distance))
+        end
     )
 end
 
 nav.move_up = function()
     move_to_closest(
         function(curr_pos, anchor_pos) return curr_pos[1] - anchor_pos[1] end,
-        function(distance, closest) return distance < 0 and (not closest or closest.distance < distance) end,
-        function(distance, farthest) return distance > 0 and (not farthest or farthest.distance > distance) end
+        function(distance, closest) return distance > 0 and (not closest or closest.distance > distance) end,
+        function(distance, farthest)
+            return (distance < 0 or not farthest or math.abs(distance) > math.abs(farthest.distance))
+        end
     )
 end
 
 nav.move_down = function()
     move_to_closest(
         function(curr_pos, anchor_pos) return curr_pos[1] - anchor_pos[1] end,
-        function(distance, closest) return distance > 0 and (not closest or closest.distance > distance) end,
-        function(distance, farthest) return distance < 0 and (not farthest or farthest.distance < distance) end
+        function(distance, closest) return distance < 0 and (not closest or closest.distance < distance) end,
+        function(distance, farthest)
+            return (distance < 0 or not farthest or math.abs(distance) > math.abs(farthest.distance))
+        end
     )
 end
 

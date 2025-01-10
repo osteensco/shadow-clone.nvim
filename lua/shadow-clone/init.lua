@@ -12,6 +12,9 @@ M.config = default_config
 --API methods
 M.navigation = navigation
 M.split = split
+M.debug = {
+    inspect = require('manager').inspect
+}
 
 -- setup function
 ---@param config? Config

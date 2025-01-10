@@ -4,7 +4,7 @@ local utils = require('shadow-clone.utils')
 local mock = require('luassert.mock')
 local stub = require('luassert.stub')
 
-local windows = {} -- mock neovim's window management
+local windows = {}
 local buf_counter = 1
 local win_counter = 1
 

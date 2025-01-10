@@ -1,6 +1,7 @@
 local split = require('shadow-clone.split')
 local mock = require('luassert.mock')
 local stub = require('luassert.stub')
+local manager = require('manager')
 
 
 ---@class MockWindow
@@ -12,7 +13,7 @@ local stub = require('luassert.stub')
 ---@class MockNVIMsWindows : table<integer, MockWindow>
 
 ---@type MockNVIMsWindows
-local windows = {} -- mock neovim's window management
+local windows = {}
 local buf_counter = 1
 local win_counter = 1
 local current_window = -1
@@ -59,6 +60,7 @@ describe("split.lua", function()
         current_window = -1
         mock.revert(vim.api)
         mock.revert(vim.fn)
+        manager.clear()
     end)
 
     describe("h_split()", function()
@@ -101,13 +103,13 @@ describe("split.lua", function()
 
             current_window = 0
 
-            split.h_split()
+            split.v_split()
 
             local expected = {
                 buf = 0,
-                pos = { 51, 0 },
-                height = 50,
-                width = 100,
+                pos = { 0, 51 },
+                height = 100,
+                width = 50,
             }
             assert.are.same(expected, windows[current_window],
                 "the split window should be halve the size of the original and located at the midpoint of the original.")

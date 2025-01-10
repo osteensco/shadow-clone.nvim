@@ -47,8 +47,7 @@ ops.get_len = function()
 end
 
 ---Push a group onto manager's stack.
----When this function is called there should always be a new member associated with that group.
----This is either the first member or the latest addition. Either way it will always be pushed onto the stack.
+---This function is called when a new window is created, or an existing group is being moved out of 'hidden' state.
 ---@param group WinGroup
 ops.push = function(group)
     local length = ops.get_len()
@@ -136,19 +135,31 @@ end
 ---@param group WinGroup
 ---@param window WinObj
 ops.remove_from_group = function(group, window)
+    assert(window.bufnr,
+        "Window needs to contain the field 'bufnr' in order to search the group for removal. Window - " ..
+        vim.inspect(window))
+    assert(window.win,
+        "Window needs to contain the field 'win' in order to search the group for removal. Window - " ..
+        vim.inspect(window))
+
+    local found = false
     for pos, win in ipairs(group.members) do
         if win.bufnr == window.bufnr and win.win == window.win then
+            found = true
             table.remove(group.members, pos)
             break
         end
     end
+
+    assert(found,
+        "The window provided was not found in the group, so it could not be removed. Group - " ..
+        vim.inspect(group) .. " Window - " .. vim.inspect(window))
+
     if #group.members == 0 then
         -- assumption is this would only get called on group that is top of stack
         -- will need adjusting if not always the case
         ops.pop()
     end
-    -- TODO
-    --  - handle not finding the window object in the group
 end
 
 ---@return string
