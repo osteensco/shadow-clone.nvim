@@ -1,5 +1,5 @@
 local config = require("shadow-clone.config")
-local manager = require('manager')
+local manager = require('scmanager')
 
 
 local utils = {}

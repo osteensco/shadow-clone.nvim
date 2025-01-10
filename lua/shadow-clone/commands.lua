@@ -9,8 +9,8 @@ cmds.init = function()
 
     -- window/group management
     vim.api.nvim_create_user_command("SCwindow", win.create_floating_window, { nargs = '?' })
-    -- vim.api.nvim_create_user_command("SChide", win.hide_group, { nargs = 0 })
-    -- vim.api.nvim_create_user_command("SCtoggle", win.toggle_group, { nargs = 0 })
+    vim.api.nvim_create_user_command("SChide", win.hide_group, { nargs = 0 })
+    vim.api.nvim_create_user_command("SCtoggle", win.toggle_group, { nargs = 0 })
 
     -- navigations
     vim.api.nvim_create_user_command("SCbubbleup", nav.bubble_up, { nargs = 0 })

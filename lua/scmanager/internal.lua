@@ -11,9 +11,13 @@
 ---@field members WinObj[]
 ---@field zindex number
 
+---@class Hidden
+---@field stack WinGroup[]
+---@field toggle WinGroup[]
+
 ---@class Data
 ---@field stack WinGroup[]
----@field hidden WinGroup[]
+---@field hidden Hidden
 
 ---@return Data
 local function init_mngr()
@@ -23,13 +27,13 @@ local function init_mngr()
         -- Floating windows are always part of a group, the stack represents the group's relative position on the z axis.
         -- There are some assumptions with the stack:
         --  - The stack should exactly correspond to the zindex of a window. The top of the stack having the highest z index.
-        --  - The stack will provide a more standardized way to set and manage zindex's of all floating windows.
-        --  - When a push operation occurs, the group is pushed onto the stack and the member that triggered the push will be provided to this function.
+        --  - The stack provides a more standardized way to set and manage zindex's of all floating windows.
+        --  - The windows in the stack will always correspond to open windows in neovim.
         stack = {},
 
-        -- Manage hidden buffers
-        -- TODO
-        --  - implement hidden stack operations
+        -- Manage hidden groups.
+        -- Maintains window and group configurations that aren't visibile but the user would like to reproduce at a later time.
+        -- The 'toggle' slot is an array that should never exceed a length of 1.
         hidden = {
             stack = {},
             toggle = {}
@@ -170,18 +174,21 @@ ops.hide_top_group = function()
 end
 
 ---toggle last accessed group
+---@return WinGroup
 ops.toggle_last_accessed_group = function()
     local group
 
     if ops.hidden_toggle_occupied() then
         group = ops.hidden_pop()
         ops.push(group)
-        return
+        return group
     end
 
     group = ops.pop()
     group.zindex = 0
     table.insert(data.hidden.toggle, group)
+
+    return group
 end
 
 
@@ -236,6 +243,12 @@ ops.remove_from_group = function(group, window)
     end
 end
 
+---Set all window ID's in group to -1 (invalid window).
+ops.hide_group_windows = function(group)
+    for _, win in ipairs(group.members) do
+        win.win = -1
+    end
+end
 
 -- Helpers
 

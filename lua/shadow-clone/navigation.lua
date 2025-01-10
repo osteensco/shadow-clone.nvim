@@ -1,4 +1,4 @@
-local manager = require('manager')
+local manager = require('scmanager')
 local utils = require('shadow-clone.utils')
 local _win = require('shadow-clone.window')
 
@@ -11,7 +11,7 @@ nav.bubble_up = function()
     local win = vim.api.nvim_get_current_win()
     local count = vim.fn.winnr('$')
     if not utils.is_floating(win) and count > 1 then
-        vim.api.nvim_win_close(win, true)
+        vim.api.nvim_win_hide(win)
         _win.create_floating_window({ buf = buf, newgroup = true })
     end
 end
@@ -25,7 +25,7 @@ nav.bubble_down = function()
         assert(next(group),
             "Peek should not return an empty table when a floating window exists.")
         manager.remove_from_group(group, { bufnr = buf, win = win })
-        vim.api.nvim_win_close(win, true)
+        vim.api.nvim_win_hide(win)
         vim.api.nvim_set_current_buf(buf)
     end
 end
@@ -35,12 +35,11 @@ nav.bubble_down_h = function()
     local buf = vim.api.nvim_get_current_buf()
     local win = vim.api.nvim_get_current_win()
     if utils.is_floating(win) then
-        local anchor = vim.api.nvim_win_get_position(win)
         local group = manager.peek()
         assert(next(group),
             "Peek should not return an empty table when a floating window exists.")
-        manager.remove_from_group(group, { bufnr = buf, win = win, anchor = { x = anchor[1], y = anchor[2] } })
-        vim.api.nvim_win_close(win, true)
+        manager.remove_from_group(group, { bufnr = buf, win = win })
+        vim.api.nvim_win_hide(win)
         vim.cmd("split")
         vim.api.nvim_set_current_buf(buf)
     end
@@ -51,12 +50,11 @@ nav.bubble_down_v = function()
     local buf = vim.api.nvim_get_current_buf()
     local win = vim.api.nvim_get_current_win()
     if utils.is_floating(win) then
-        local anchor = vim.api.nvim_win_get_position(win)
         local group = manager.peek()
         assert(next(group),
             "Peek should not return an empty table when a floating window exists.")
-        manager.remove_from_group(group, { bufnr = buf, win = win, anchor = { x = anchor[1], y = anchor[2] } })
-        vim.api.nvim_win_close(win, true)
+        manager.remove_from_group(group, { bufnr = buf, win = win })
+        vim.api.nvim_win_hide(win)
         vim.cmd("vsplit")
         vim.api.nvim_set_current_buf(buf)
     end
@@ -147,153 +145,6 @@ nav.move_down = function()
 end
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
--- -- Move to the closest left window in the same group.
--- -- Moves to the rightmost window if current window is the leftmost of the group.
--- nav.move_left = function()
---     local curr_win = vim.api.nvim_get_current_win()
---     if utils.is_floating(curr_win) and manager.get_len() > 0 then
---         ---@type WinGroup
---         local group = manager.peek()
---         assert(next(group),
---             "Peek should not return an empty table when a floating window exists.")
---
---         ---@type WindowDistance
---         local closest, farthest = nil, nil
---         local curr_pos = vim.api.nvim_win_get_position(curr_win)
---         for _, win in ipairs(group.members) do
---             if win.win ~= curr_win then
---                 local distance = curr_pos[2] - win.anchor[2]
---                 if distance > 0 and (not closest or closest.distance > distance) then
---                     closest = { distance = distance, winnr = win.win }
---                 elseif distance < 0 and (not farthest or farthest.distance < distance) then
---                     farthest = { distance = distance, winnr = win.win }
---                 end
---             end
---         end
---
---         if not closest and not farthest then
---             return
---         end
---
---         local destination = closest or farthest
---         vim.api.nvim_set_current_win(destination.winnr)
---     end
--- end
---
--- -- Move to the closest right window in the same group.
--- -- Moves to the leftmost window if current window is the rightmost of the group.
--- nav.move_right = function()
---     local curr_win = vim.api.nvim_get_current_win()
---     if utils.is_floating(curr_win) and manager.get_len() > 0 then
---         ---@type WinGroup
---         local group = manager.peek()
---         assert(next(group),
---             "Peek should not return an empty table when a floating window exists.")
---
---         ---@type WindowDistance
---         local closest, farthest = nil, nil
---         local curr_pos = vim.api.nvim_win_get_position(curr_win)
---         for _, win in ipairs(group.members) do
---             if win.win ~= curr_win then
---                 local distance = curr_pos[2] - win.anchor[2]
---                 if distance < 0 and (not closest or closest.distance < distance) then
---                     closest = { distance = distance, winnr = win.win }
---                 elseif distance > 0 and (not farthest or farthest.distance > distance) then
---                     farthest = { distance = distance, winnr = win.win }
---                 end
---             end
---         end
---
---         if not closest and not farthest then
---             return
---         end
---
---         local destination = closest or farthest
---         vim.api.nvim_set_current_win(destination.winnr)
---     end
--- end
---
--- -- Move to the closest window above current window in the same group.
--- -- Moves to the bottom most window if current window is the topmost of the group.
--- nav.move_up = function()
---     local curr_win = vim.api.nvim_get_current_win()
---     if utils.is_floating(curr_win) and manager.get_len() > 0 then
---         ---@type WinGroup
---         local group = manager.peek()
---         assert(next(group),
---             "Peek should not return an empty table when a floating window exists.")
---
---         ---@type WindowDistance
---         local closest, farthest = nil, nil
---         local curr_pos = vim.api.nvim_win_get_position(curr_win)
---         for _, win in ipairs(group.members) do
---             if win.win ~= curr_win then
---                 local distance = curr_pos[1] - win.anchor[1]
---                 if distance < 0 and (not closest or closest.distance < distance) then
---                     closest = { distance = distance, winnr = win.win }
---                 elseif distance > 0 and (not farthest or farthest.distance > distance) then
---                     farthest = { distance = distance, winnr = win.win }
---                 end
---             end
---         end
---
---         if not closest and not farthest then
---             return
---         end
---
---         local destination = closest or farthest
---         vim.api.nvim_set_current_win(destination.winnr)
---     end
--- end
---
--- -- Move to the closest window below current window in the same group.
--- -- Moves to the top most if current window is the bottom most of the group.
--- nav.move_down = function()
---     local curr_win = vim.api.nvim_get_current_win()
---     if utils.is_floating(curr_win) and manager.get_len() > 0 then
---         ---@type WinGroup
---         local group = manager.peek()
---         assert(next(group),
---             "Peek should not return an empty table when a floating window exists.")
---
---         ---@type WindowDistance
---         local closest, farthest = nil, nil
---         local curr_pos = vim.api.nvim_win_get_position(curr_win)
---         for _, win in ipairs(group.members) do
---             if win.win ~= curr_win then
---                 local distance = curr_pos[1] - win.anchor[1]
---                 if distance > 0 and (not closest or closest.distance > distance) then
---                     closest = { distance = distance, winnr = win.win }
---                 elseif distance < 0 and (not farthest or farthest.distance < distance) then
---                     farthest = { distance = distance, winnr = win.win }
---                 end
---             end
---         end
---
---         if not closest and not farthest then
---             return
---         end
---
---         local destination = closest or farthest
---         vim.api.nvim_set_current_win(destination.winnr)
---     end
--- end
 
 
 

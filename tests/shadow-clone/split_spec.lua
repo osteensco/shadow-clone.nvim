@@ -1,7 +1,7 @@
 local split = require('shadow-clone.split')
 local mock = require('luassert.mock')
 local stub = require('luassert.stub')
-local manager = require('manager')
+local manager = require('scmanager')
 
 
 ---@class MockWindow

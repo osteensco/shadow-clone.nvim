@@ -1,6 +1,6 @@
 local utils = require('shadow-clone.utils')
 local _win = require('shadow-clone.window')
-local manager = require('manager')
+local manager = require('scmanager')
 
 
 local split = {}

@@ -1,4 +1,4 @@
-local manager = require('manager')
+local manager = require('scmanager')
 local mock = require('luassert.mock')
 local api = mock(vim.api, true)
 

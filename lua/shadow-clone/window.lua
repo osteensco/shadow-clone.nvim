@@ -1,4 +1,4 @@
-local manager = require('manager')
+local manager = require('scmanager')
 local config = require('shadow-clone.config')
 local utils = require('shadow-clone.utils')
 
@@ -9,6 +9,7 @@ local win = {}
 ---@class CreateFloatOpts
 ---@field buf? integer
 ---@field newgroup? boolean
+---@field recon? boolean
 ---@field win_config? vim.api.keyset.win_config
 
 --- Creates a floating window and adds it to shadow-clone.nvim's window manager.
@@ -56,8 +57,10 @@ win.create_floating_window = function(opts)
         local g = manager.pop()
         group = g or group
     end
-    manager.add_to_group(group, window)
-    manager.push(group, window)
+    if not opts.recon then
+        manager.add_to_group(group, window)
+        manager.push(group, window)
+    end
 
     ---show additional info if in debug mode
     local grp = manager.peek()
@@ -67,7 +70,61 @@ win.create_floating_window = function(opts)
 end
 
 
--- toggle a floating terminal, creates a new terminal buffer if float.term.last_accessed is nil
+
+
+
+---Deconstruct a group's windows.
+---@param group WinGroup
+local decon_group = function(group)
+    for _, w in ipairs(group.members) do
+        vim.api.nvim_win_hide(w.win)
+    end
+    manager.hide_group_windows(group)
+end
+
+---Reconstruct a group's windows from a WinGroup object.
+---@param group WinGroup
+local recon_group = function(group)
+    for _, w in ipairs(group.members) do
+        win.create_floating_window({
+            buf = w.bufnr,
+            win_config = {
+                height = w.height,
+                width = w.width,
+                row = w.anchor[1],
+                col = w.anchor[2]
+            },
+            newgroup = false,
+            recon = true
+        })
+    end
+end
+
+
+
+-- Move the current group to a hidden state.
+win.hide_group = function()
+    local group = manager.peek()
+    manager.hide_top_group()
+    decon_group(group)
+end
+
+
+--TODO
+-- - this is broken, please fix
+
+--  Open the group currently in the toggle slot or move the group from the top of the stack to the toggle slot.
+win.toggle_group = function()
+    local group = manager.toggle_last_accessed_group()
+    if group.zindex ~= 0 then
+        recon_group(group)
+    else
+        decon_group(group)
+    end
+end
+
+
+-- toggle a floating terminal
 -- M.toggle_floating_terminal = function()
 --     local term = manager.ledger.float.terminal.last_accessed
 --     if not vim.api.nvim_win_is_valid(term.win) then
@@ -82,16 +139,6 @@ end
 --         vim.api.nvim_win_hide(term.win)
 --     end
 -- end
-
-
-
-
--- TODO
---  - use these to implement hide and toggle
--- manager.hide_top_group
--- manager.toggle_last_accessed_group
-
-
 
 
 

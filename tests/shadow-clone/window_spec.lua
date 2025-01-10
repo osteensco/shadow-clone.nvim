@@ -1,5 +1,5 @@
 local win = require('shadow-clone.window')
-local manager = require('manager')
+local manager = require('scmanager')
 local utils = require('shadow-clone.utils')
 local mock = require('luassert.mock')
 local stub = require('luassert.stub')
