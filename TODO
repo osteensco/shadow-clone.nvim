@@ -11,7 +11,7 @@ TODO
             - similar to normal window navigation using h,j,k,l
         [X] cycle and swap window groups along z axis
         [-] move individual windows along the 'z' axis
-        [-] implement additional stack for hidden windows
+        [X] implement additional stack for hidden windows
             - between a hidden toggle 
             - ability to move a hidden group to the top of the main stack
                 - see ''telescope view' below
