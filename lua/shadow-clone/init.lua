@@ -15,7 +15,7 @@ M.navigation = navigation
 M.split = split
 M.debug = {
     inspect = utils.inspect,
-    inspect_hidden = utils.hidden_inspect,
+    inspect_hidden = utils.inspect_hidden,
 }
 
 -- setup function

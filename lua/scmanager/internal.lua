@@ -157,11 +157,7 @@ ops.hidden_pop = function()
     local group
     local length = ops.hidden_get_len()
 
-    if not ops.hidden_toggle_occupied() then
-        group = table.remove(data.hidden.stack, length)
-    else
-        group = table.remove(data.hidden.toggle, 1)
-    end
+    group = table.remove(data.hidden.stack, length)
 
     return group
 end
@@ -179,8 +175,9 @@ ops.toggle_last_accessed_group = function()
     local group
 
     if ops.hidden_toggle_occupied() then
-        group = ops.hidden_pop()
+        group = table.remove(data.hidden.toggle, 1)
         ops.push(group)
+        group = ops.peek()
         return group
     end
 

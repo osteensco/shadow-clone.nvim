@@ -65,7 +65,7 @@ describe('navigation.lua', function()
         end) -- this is breaking tests
         stub(vim.api, 'nvim_win_get_height', function() return 100 end)
         stub(vim.api, 'nvim_win_get_width', function() return 100 end)
-        stub(vim.api, 'nvim_win_close', function() current_win = current_win - 1 end)
+        stub(vim.api, 'nvim_win_hide', function() current_win = current_win - 1 end)
         stub(vim.api, 'nvim_set_current_buf', function(bufnr) normal_wins[current_win].buf = bufnr end)
 
         mock(vim.cmd, function(split_type)

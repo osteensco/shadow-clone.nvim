@@ -30,6 +30,7 @@ describe('window.lua', function()
             return winnr
         end)
         stub(vim.api, "nvim_win_get_position", function() return { 10, 20 } end)
+        stub(vim.api, "nvim_win_hide", function() end)
         manager.clear()
     end)
 
@@ -97,6 +98,72 @@ describe('window.lua', function()
 
             assert.are.same(opts.win_config.title, windows[key].title,
                 "The title provided in the config arg should be successfully passed to create_floating_window().")
+        end)
+    end)
+
+    describe('hide_group()', function()
+        it('should successfully hide the group', function()
+            local opts = {
+                buf = 0,
+                row = 0,
+                col = 0,
+                height = 50,
+                width = 50,
+            }
+            local window1 = win.create_floating_window(opts)
+            opts = {
+                buf = 0,
+                row = 51,
+                col = 51,
+                height = 50,
+                width = 50,
+            }
+            local window2 = win.create_floating_window(opts)
+
+
+            local expected = manager.peek()
+
+            win.hide_group()
+
+            assert.are.same(vim.inspect({ expected }), manager.hidden_inspect().stack)
+        end)
+    end)
+
+    describe('toggle_group()', function()
+        it('should successfully toggle the group', function()
+            local opts = {
+                buf = 0,
+                row = 0,
+                col = 0,
+                height = 50,
+                width = 50,
+            }
+            local window1 = win.create_floating_window(opts)
+            opts = {
+                buf = 0,
+                row = 51,
+                col = 51,
+                height = 50,
+                width = 50,
+            }
+            local window2 = win.create_floating_window(opts)
+
+
+            local expected = manager.peek()
+
+            win.toggle_group()
+
+            -- main stack should be empty
+            assert.equals(0, manager.get_len())
+            -- toggle slot should contain 'expected'
+            assert.equals(vim.inspect({ expected }), manager.hidden_inspect().toggle)
+
+            -- call toggle a second time
+            win.toggle_group()
+            -- toggle slot should be empty
+            assert.equals('{}', manager.hidden_inspect().toggle)
+            -- main stack should contain 'expected'
+            assert.equals(vim.inspect({ expected }), manager.inspect())
         end)
     end)
 end)
