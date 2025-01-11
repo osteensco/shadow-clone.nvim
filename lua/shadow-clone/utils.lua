@@ -80,10 +80,15 @@ end
 
 -- Display information helpful to debuggin on floating windows.
 utils.debug_display = function(grp, window)
-    if config.DEBUG then
+    if require('shadow-clone').config.DEBUG then
         local testconfig = {
             title = "group: " ..
-                grp.zindex .. " win: " .. window.win .. " - x: " .. window.anchor[2] .. ", y: " .. window.anchor[1],
+                grp.zindex ..
+                " win: " ..
+                window.win ..
+                " - x: " ..
+                window.anchor[2] .. ", y: " .. window.anchor[1] ..
+                "| height: " .. window.height .. ", width: " .. window.width,
             title_pos = "center"
         }
         vim.api.nvim_win_set_config(window.win, testconfig)

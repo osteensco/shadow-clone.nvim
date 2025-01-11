@@ -26,6 +26,7 @@ M.setup = function(config)
 end
 
 
+
 -- Set commands
 commands.init()
 -- Set keymaps

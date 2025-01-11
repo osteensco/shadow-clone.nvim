@@ -173,19 +173,21 @@ end
 ---@return WinGroup
 ops.toggle_last_accessed_group = function()
     local group
+    local occupied = ops.hidden_toggle_occupied()
 
-    if ops.hidden_toggle_occupied() then
+    if occupied then
         group = table.remove(data.hidden.toggle, 1)
-        ops.push(group)
-        group = ops.peek()
-        return group
+        -- Add an empty new group to the main stack.
+        -- This will be hydrated with the group this function returns by window.recon_group.
+        local newgrp = ops.new_group()
+        ops.push(newgrp)
+    else
+        group = ops.pop()
+        group.zindex = 0
+        table.insert(data.hidden.toggle, group)
     end
 
-    group = ops.pop()
-    group.zindex = 0
-    table.insert(data.hidden.toggle, group)
-
-    return group
+    return group, occupied
 end
 
 

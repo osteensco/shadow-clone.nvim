@@ -9,7 +9,6 @@ local win = {}
 ---@class CreateFloatOpts
 ---@field buf? integer
 ---@field newgroup? boolean
----@field recon? boolean
 ---@field win_config? vim.api.keyset.win_config
 
 --- Creates a floating window and adds it to shadow-clone.nvim's window manager.
@@ -32,6 +31,7 @@ win.create_floating_window = function(opts)
         -- TODO
         -- need highlight group for background
     }
+
     -- override defaults with provided opts
     win_config = vim.tbl_deep_extend('force', win_config, opts.win_config)
 
@@ -48,7 +48,9 @@ win.create_floating_window = function(opts)
     local window = {
         bufnr = buf,
         win = winnr,
-        anchor = vim.api.nvim_win_get_position(winnr)
+        anchor = vim.api.nvim_win_get_position(winnr),
+        height = win_config.height,
+        width = win_config.width,
     }
 
     ---@type WinGroup
@@ -57,10 +59,8 @@ win.create_floating_window = function(opts)
         local g = manager.pop()
         group = g or group
     end
-    if not opts.recon then
-        manager.add_to_group(group, window)
-        manager.push(group, window)
-    end
+    manager.add_to_group(group, window)
+    manager.push(group, window)
 
     ---show additional info if in debug mode
     local grp = manager.peek()
@@ -95,7 +95,6 @@ local recon_group = function(group)
                 col = w.anchor[2]
             },
             newgroup = false,
-            recon = true
         })
     end
 end
@@ -115,8 +114,8 @@ end
 
 --  Open the group currently in the toggle slot or move the group from the top of the stack to the toggle slot.
 win.toggle_group = function()
-    local group = manager.toggle_last_accessed_group()
-    if group.zindex ~= 0 then
+    local group, toggle_occupied = manager.toggle_last_accessed_group()
+    if toggle_occupied then
         recon_group(group)
     else
         decon_group(group)

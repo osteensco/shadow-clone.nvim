@@ -25,6 +25,16 @@ cmds.init = function()
     -- splits
     vim.api.nvim_create_user_command("SCsplit", split.h_split, { nargs = '?' })
     vim.api.nvim_create_user_command("SCvsplit", split.v_split, { nargs = '?' })
+
+    -- debug
+    vim.api.nvim_create_user_command("SCinspect", function()
+        print(require('shadow-clone.utils').inspect())
+    end, { nargs = 0 })
+    vim.api.nvim_create_user_command("SCinspecthidden", function()
+        local hidden = require('shadow-clone.utils').inspect_hidden()
+        print("hidden.stack: " .. hidden.stack)
+        print("hidden.toggle: " .. hidden.toggle)
+    end, { nargs = 0 })
 end
 
 return cmds
