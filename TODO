@@ -15,6 +15,11 @@ TODO
             - between a hidden toggle 
             - ability to move a hidden group to the top of the main stack
                 - see ''telescope view' below
+        [-] option for permanent toggle
+            - toggle would have to be explicitly
+                - swapped to a new group
+                - allocated to a specific group (attempted to toggle a non allocated group would fail)
+                - deallocated (specifically unassign a group from the toggle slot with a command)
         [X] move current buffer into a floating window and back into a non floating split window
             - bubbleup / bubbledown
         [X] create/manage float groups
