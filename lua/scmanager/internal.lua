@@ -6,20 +6,27 @@
 ---@field bufnr number buffer number of a floating window
 ---@field win number window ID of a floating window
 ---@field anchor Anchor x, y coordinates that represents the window's anchor
+---@field height number height of the window
+---@field width number width of the window
 
 ---@class WinGroup
 ---@field members WinObj[]
 ---@field zindex number
+---@field toggle_bufnr? integer
 
----@class Hidden
+---@class ToggleTable
+---@field slot WinGroup[]
+---@field buffers table<integer, WinGroup>
+
+---@class HiddenTable
 ---@field stack WinGroup[]
----@field toggle WinGroup[]
+---@field toggle ToggleTable
 
----@class Data
+---@class DataTable
 ---@field stack WinGroup[]
----@field hidden Hidden
+---@field hidden HiddenTable
 
----@return Data
+---@return DataTable
 local function init_mngr()
     return {
 
@@ -40,14 +47,14 @@ local function init_mngr()
             toggle = {
                 slot = {},
                 buffers = {
-                    [0] = {},
+                    -- [0] = {},
                 }
             }
         }
     }
 end
 
----@type Data
+---@type DataTable
 local data = init_mngr()
 
 
@@ -138,26 +145,42 @@ ops.hidden_get_len = function()
     return #data.hidden.stack
 end
 
-
--- TODO
--- - implement methods for toggle.buffers
-
-ops.set_toggle_buffer = function()
-    -- TODO
+---@param bufnr integer
+---@param group WinGroup
+ops.set_toggle_buffer = function(bufnr, group)
+    group.toggle_bufnr = bufnr
+    data.hidden.toggle.buffers[bufnr] = group
 end
 
-ops.clear_toggle_buffer = function()
-    -- TODO
+---@param bufnr integer
+ops.clear_toggle_buffer = function(bufnr)
+    data.hidden.toggle.buffers[bufnr] = nil
 end
 
-ops.toggle_toggle = function()
-    -- TODO
-    --  - identify a toggle buffer within the main stack
-    --      - assign a toggle buffer (starts at 0)
-    --      - a WinGroup will have an optional field, toggle_bufnr
+---@param bufnr integer
+---@return WinGroup
+ops.get_toggle_buffer = function(bufnr)
+    assert(data.hidden.toggle.buffers[bufnr], "The toggle buffer is not currently allocated, toggle bufnr - " .. bufnr)
+    return data.hidden.toggle.buffers[bufnr]
 end
 
-ops.hidden_toggle_occupied = function()
+---Toggle a group located in the provided toggle buffer. Returns boolean represting whether or not the group was added to the main stack.
+---@param bufnr integer
+---@return WinGroup, boolean
+ops.toggle_persisted_group = function(bufnr)
+    for i, group in ipairs(data.stack) do
+        if group.toggle_bufnr == bufnr then
+            table.remove(data.stack, i)
+            return group, false
+        end
+    end
+    local newgrp = ops.new_group()
+    ops.push(newgrp)
+    local group = ops.get_toggle_buffer(bufnr)
+    return group, true
+end
+
+ops.hidden_toggle_slot_occupied = function()
     assert(#data.hidden.toggle.slot < 2,
         "the hidden toggle slot should never be more than 1. data.hidden.toggle.slot - ",
         vim.inspect(data.hidden.toggle.slot))
@@ -183,13 +206,14 @@ ops.hide_top_group = function()
     local group = ops.pop()
     group.zindex = 0
     table.insert(data.hidden.stack, group)
+    ops.hide_group_windows(group)
 end
 
 ---toggle last accessed group
----@return WinGroup
+---@return WinGroup, boolean
 ops.toggle_last_accessed_group = function()
     local group
-    local occupied = ops.hidden_toggle_occupied()
+    local occupied = ops.hidden_toggle_slot_occupied()
 
     if occupied then
         group = table.remove(data.hidden.toggle.slot, 1)
@@ -259,11 +283,14 @@ ops.remove_from_group = function(group, window)
 end
 
 ---Set all window ID's in group to -1 (invalid window).
+---@param group WinGroup
 ops.hide_group_windows = function(group)
     for _, win in ipairs(group.members) do
         win.win = -1
     end
 end
+
+
 
 -- Helpers
 

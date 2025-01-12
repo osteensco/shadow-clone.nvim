@@ -102,23 +102,25 @@ describe('manager/internal.lua', function()
         assert.are.same(2, manager.hidden_get_len())
     end)
 
-    it('manager.hidden_toggle_occupied() should accuratley reflect if the toggle slot is occupied or not.', function()
-        local group = manager.new_group()
-        manager.push(group)
+    it('manager.hidden_toggle_slot_occupied() should accuratley reflect if the toggle slot is occupied or not.',
+        function()
+            local group = manager.new_group()
+            manager.push(group)
 
 
-        manager.toggle_last_accessed_group()
+            manager.toggle_last_accessed_group()
 
-        assert(manager.hidden_toggle_occupied(), "toggle slot should be occupied after first function call.")
-        assert.are.same(vim.inspect({ group }), manager.hidden_inspect().toggle,
-            "toggle slot group should be the group we initialized after first function call.")
+            assert(manager.hidden_toggle_slot_occupied(), "toggle slot should be occupied after first function call.")
+            assert.are.same(vim.inspect({ group }), manager.hidden_inspect().toggle,
+                "toggle slot group should be the group we initialized after first function call.")
 
-        manager.toggle_last_accessed_group()
+            manager.toggle_last_accessed_group()
 
-        assert(not manager.hidden_toggle_occupied(), "toggle slot should not be occupied after second function call.")
-        assert.are.same('{}', manager.hidden_inspect().toggle,
-            "toggle slot should not be occupied after second function call.")
-    end)
+            assert(not manager.hidden_toggle_slot_occupied(),
+                "toggle slot should not be occupied after second function call.")
+            assert.are.same('{}', manager.hidden_inspect().toggle,
+                "toggle slot should not be occupied after second function call.")
+        end)
 
     it('manager.hidden_pop() should pop the top group off the hidden stack.', function()
         local group = manager.new_group()
@@ -155,10 +157,11 @@ describe('manager/internal.lua', function()
 
 
             manager.toggle_last_accessed_group()
-            assert(manager.hidden_toggle_occupied(), "toggle slot should be occupied after first function call.")
+            assert(manager.hidden_toggle_slot_occupied(), "toggle slot should be occupied after first function call.")
 
             manager.toggle_last_accessed_group()
-            assert(not manager.hidden_toggle_occupied(), "toggle slot should not be occupied after second function call.")
+            assert(not manager.hidden_toggle_slot_occupied(),
+                "toggle slot should not be occupied after second function call.")
         end)
 
 
@@ -188,6 +191,16 @@ describe('manager/internal.lua', function()
 
         assert.are.same(#group.members, 1)
         assert.are.same(group.members[1], win2)
+    end)
+
+    it('manager.set_toggle_buffer() should allocated a buffer to a group', function()
+        --TODO
+    end)
+    it('manager.clear_toggle_buffer() should deallocate an allocated toggle buffer', function()
+        --TODO
+    end)
+    it('manager.get_toggle_buffer() should return the group persisted in a given buffer', function()
+        --TODO
     end)
 end)
 

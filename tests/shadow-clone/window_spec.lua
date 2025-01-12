@@ -31,9 +31,9 @@ describe('window.lua', function()
                 width = config.width,
                 title = config.title
             }
-            if enter then
-                current_window = winnr
-            end
+            -- if enter then
+            --     current_window = winnr
+            -- end
 
             return winnr
         end)
@@ -184,7 +184,7 @@ describe('window.lua', function()
             -- toggle should empty the stack with first call
             assert.equals(0, manager.get_len(), "main stack should be empty after first toggle.")
             -- toggle slot should now be occupied
-            assert(manager.hidden_toggle_occupied(),
+            assert(manager.hidden_toggle_slot_occupied(),
                 "toggle slot should be occupied with group that was originally in the main stack.")
 
 
@@ -199,6 +199,12 @@ describe('window.lua', function()
                 " toggle slot - " .. manager.hidden_inspect().toggle .. ", main stack - " .. manager.inspect())
             assert.equals(expected, manager.inspect(),
                 "main stack should contain group captured in 'expected'")
+        end)
+    end)
+
+    describe('toggle_persistent_group()', function()
+        it('should successfully toggle the group and persist it in a toggle buffer.', function()
+            -- TODO
         end)
     end)
 end)

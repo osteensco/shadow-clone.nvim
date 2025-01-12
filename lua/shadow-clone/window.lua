@@ -60,7 +60,7 @@ win.create_floating_window = function(opts)
         group = g or group
     end
     manager.add_to_group(group, window)
-    manager.push(group, window)
+    manager.push(group)
 
     ---show additional info if in debug mode
     local grp = manager.peek()
@@ -79,7 +79,6 @@ local decon_group = function(group)
     for _, w in ipairs(group.members) do
         vim.api.nvim_win_hide(w.win)
     end
-    manager.hide_group_windows(group)
 end
 
 ---Reconstruct a group's windows from a WinGroup object.
@@ -99,18 +98,12 @@ local recon_group = function(group)
     end
 end
 
-
-
 -- Move the current group to a hidden state.
 win.hide_group = function()
     local group = manager.peek()
     manager.hide_top_group()
     decon_group(group)
 end
-
-
---TODO
--- - this is broken, please fix
 
 --  Open the group currently in the toggle slot or move the group from the top of the stack to the toggle slot.
 win.toggle_group = function()
@@ -122,22 +115,16 @@ win.toggle_group = function()
     end
 end
 
-
--- toggle a floating terminal
--- M.toggle_floating_terminal = function()
---     local term = manager.ledger.float.terminal.last_accessed
---     if not vim.api.nvim_win_is_valid(term.win) then
---         term = M.create_floating_window({ buf = term.buf })
---         -- TODO
---         --  - abstract into "terminal start" function
---         if vim.bo[term.buf].buftype ~= "terminal" then
---             vim.cmd.terminal()
---         end
---         manager.update_access(term)
---     else
---         vim.api.nvim_win_hide(term.win)
---     end
--- end
+-- Toggle the group persisted in the provided toggle buffer.
+win.toggle_persisted_group = function(bufnr)
+    local group, hidden = manager.toggle_persisted_group(bufnr)
+    -- if found in a hidden state we need to reconstruct the windows
+    if hidden then
+        recon_group(group)
+    else
+        decon_group(group)
+    end
+end
 
 
 
