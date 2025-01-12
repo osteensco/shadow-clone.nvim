@@ -1,6 +1,6 @@
 TODO
 
-- basic idea is to provide a robust API for creating, managing,  and manipulating floating windows
+- basic idea is to provide a robust API for creating, managing, and manipulating floating windows
 
     - main features:
         [X] split floating windows 
@@ -17,36 +17,34 @@ TODO
                 - see ''telescope view' below
         [X] move current buffer into a floating window and back into a non floating split window
             - bubbleup / bubbledown
-        [X]create/manage float groups
+        [X] create/manage float groups
             - a float group should represent all floats contained on a given z access
-        [-]telescope view of groups (hidden and visible) for easy navigation
-            - config option to hide current visible floats
-        [-]opening a new floating window with one visible should place new float at top of z stack
-        [-]should natively support/integrate other plugins that manage floating windows and buffer navigation
+        [-] telescope view of groups (hidden and visible) for easy navigation
+            - config option to hide current visible windows
+        [-] "hide all" command
+            - essentially just move entire main stack to hidden stack
+        [-] opening a new floating window with one visible should place new float at top of z stack
+        [-] should natively support/integrate other plugins that manage floating windows and buffer navigation
             - ex. toggleterm, arrow, harpoon, etc.
+            - requires listeners to place floating windows in groups
+                - this comes with caveats like 
+                    - ignoring shadow-clone created windows (avoid duplication)
+                    - ignoring or handling 'volatile' windows (windows that close their buffer when exited)
+                        - this should just be the difference between nvim_win_close and nvim_win_hide
 
     - potential advanced features:
-        [-]automagic resizing 
-            - if a window is moved to a z index with multiple windows
+        [-] automagic resizing 
+            - a use case would be if a window is moved to a group (z index) already containing multiple windows
                 - this would also require auto positioning
-            - at same z index if a window closes
-            - toggleable in config
-        [-]support continuous manual resizing and movement of floating windows
+            - fill in space with adjacent window if a window closes
+            - toggleable/adjustable in config
+        [-] support continuous manual resizing and movement of floating windows
             - hold down key bindings to:
                 - expand/reduce height/width
                 - move float horizontally/laterally along current z access
-        [-]make pretty command that fixes overlapping floats on current z axis
+                - ability do each of these with multiple windows at once
+        [-] make pretty command that fixes overlapping floats on current z axis
             - adjust current group's layout by automatically moving and resizing floats
-        [-]persist window configurations by project using CWD
-        [-]a window selection UI like OS window selection view
+        [-] persist window configurations by project using CWD
 
-- code improvements
-    [-]ADD TESTS
-    [-]last accessed should just be a stack
-    [-]window type should be part of window obj, or accessible via a method
-    [-]add lua "types"
-        - @class
-        - @fields
-    [-]add arg and return types
-        - @param
-        - @return
+
