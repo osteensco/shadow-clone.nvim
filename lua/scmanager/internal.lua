@@ -33,10 +33,16 @@ local function init_mngr()
 
         -- Manage hidden groups.
         -- Maintains window and group configurations that aren't visibile but the user would like to reproduce at a later time.
-        -- The 'toggle' slot is an array that should never exceed a length of 1.
+        -- The toggle slot is an array that should never exceed a length of 1. This is a volatile slot that clears after each unhide toggle.
+        -- The toggle buffers is a series of persisted slots that can only be explicitly cleared or altered.
         hidden = {
             stack = {},
-            toggle = {}
+            toggle = {
+                slot = {},
+                buffers = {
+                    [0] = {},
+                }
+            }
         }
     }
 end
@@ -116,15 +122,6 @@ end
 ops.cycle = function()
     local top = ops.pop()
     table.insert(data.stack, 1, top)
-    -- TODO
-    --  - verify this loop isn't needed
-    for i, g in ipairs(data.stack) do
-        if i ~= 1 then
-            g.zindex = g.zindex + 1
-        else
-            g.zindex = 1
-        end
-    end
 end
 
 ---moves bottom group to the top of the stack, and shifts all other groups down one.
@@ -138,15 +135,34 @@ end
 ---Hidden stack operations
 
 ops.hidden_get_len = function()
-    return #data.hidden.stack + #data.hidden.toggle
+    return #data.hidden.stack
+end
+
+
+-- TODO
+-- - implement methods for toggle.buffers
+
+ops.set_toggle_buffer = function()
+    -- TODO
+end
+
+ops.clear_toggle_buffer = function()
+    -- TODO
+end
+
+ops.toggle_toggle = function()
+    -- TODO
+    --  - identify a toggle buffer within the main stack
+    --      - assign a toggle buffer (starts at 0)
+    --      - a WinGroup will have an optional field, toggle_bufnr
 end
 
 ops.hidden_toggle_occupied = function()
-    assert(#data.hidden.toggle < 2,
-        "the toggle slot in the hidden stack should never be more than 1. data.hidden.toggle - ",
-        vim.inspect(data.hidden.toggle))
+    assert(#data.hidden.toggle.slot < 2,
+        "the hidden toggle slot should never be more than 1. data.hidden.toggle.slot - ",
+        vim.inspect(data.hidden.toggle.slot))
 
-    if #data.hidden.toggle == 0 then
+    if #data.hidden.toggle.slot == 0 then
         return false
     end
 
@@ -176,7 +192,7 @@ ops.toggle_last_accessed_group = function()
     local occupied = ops.hidden_toggle_occupied()
 
     if occupied then
-        group = table.remove(data.hidden.toggle, 1)
+        group = table.remove(data.hidden.toggle.slot, 1)
         -- Add an empty new group to the main stack.
         -- This will be hydrated with the group this function returns by window.recon_group.
         local newgrp = ops.new_group()
@@ -184,7 +200,7 @@ ops.toggle_last_accessed_group = function()
     else
         group = ops.pop()
         group.zindex = 0
-        table.insert(data.hidden.toggle, group)
+        table.insert(data.hidden.toggle.slot, group)
     end
 
     return group, occupied
@@ -260,7 +276,7 @@ end
 ops.hidden_inspect = function()
     return {
         stack = vim.inspect(data.hidden.stack),
-        toggle = vim.inspect(data.hidden.toggle)
+        toggle = vim.inspect(data.hidden.toggle.slot)
     }
 end
 
