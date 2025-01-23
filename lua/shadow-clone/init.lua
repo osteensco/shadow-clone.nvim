@@ -1,4 +1,4 @@
-local manager = require("scmanager")
+local window = require("shadow-clone.window")
 local navigation = require("shadow-clone.navigation")
 local split = require("shadow-clone.split")
 local default_config = require("shadow-clone.config")
@@ -14,12 +14,15 @@ M.config = default_config
 --API methods
 M.navigation = navigation
 M.split = split
-
--- TODO
--- - make command as well
-M.toggle = {
-    set_toggle = manager.set_toggle_buffer
+M.win = {
+    new = window.create_floating_window,
+    group = {
+        hide = window.hide_group,
+        toggle = window.toggle_group,
+        togglebuf = window.toggle_persisted_group
+    }
 }
+
 M.debug = {
     inspect = utils.inspect,
     inspect_hidden = utils.inspect_hidden,
