@@ -20,7 +20,7 @@ local config = {
 
 <p>
 shadow-clone.nvim is a plugin that provides commands and a robust API to manage floating windows on the same level as normal windows in Neovim. This means splitting, controlling the z-index, navigating between floating windows, etc.
-The goal is to provide every functionality Neovim provides for normal windows to floating windows, plus some additional nice features.
+The goal is to provide every functionality Neovim provides for normal windows to floating windows, plus some nice additions.
 </p>
 <br>
 <p>
@@ -37,7 +37,7 @@ There is also an ad hoc toggle slot available to use that is cleared after toggl
  - SCbubbleup: Move a normal window to a floating window (creates a new group)
  - SCbubbledown: Move a floating window to a normal window (replaces the buffer of last accessed normal window)
  - SCbubbledownh: Move a floating window to a horzontal split of the last accessed normal window
- - SCbubbledownh: Move a floating window to a vertical split of the last accessed normal window
+ - SCbubbledownv: Move a floating window to a vertical split of the last accessed normal window
  - SCmoveleft: Move left laterally within the same group
  - SCmoveright: Move right laterally within the same group
  - SCmoveup: Move up laterally within the same group
@@ -45,7 +45,7 @@ There is also an ad hoc toggle slot available to use that is cleared after toggl
  - SCsplit: Split a floating window horizontally
  - SCvsplit: Split a floating window vertically
  - SCinspect: Prints the contents of shadow-clone's main stack
- - SCinspecthidden: Prints the contents of shadow-clone's hidden data structure (toggle buffers, groups that were hidden)
+ - SCinspecthidden: Prints the contents of shadow-clone's hidden data structure (toggle buffers and groups that are in a hidden status)
 
 
 <h3>API</h3>
