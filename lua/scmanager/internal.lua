@@ -164,7 +164,7 @@ ops.get_toggle_buffer = function(bufnr)
     return data.hidden.toggle.buffers[bufnr]
 end
 
----Toggle a group located in the provided toggle buffer. Returns boolean represting whether or not the group was added to the main stack.
+---Toggle a group located in the provided toggle buffer. Returns a WinGroup and a boolean represting whether or not the group was added to the main stack.
 ---@param bufnr integer
 ---@return WinGroup, boolean
 ops.toggle_persisted_group = function(bufnr)
@@ -237,7 +237,7 @@ end
 ---creates a new WinGroup
 ---@return WinGroup
 ops.new_group = function()
-    return { members = {}, zindex = 0 }
+    return { members = {}, zindex = 0, toggle_buffer = nil }
 end
 
 ---adds window object to a group
@@ -299,11 +299,20 @@ ops.inspect = function()
     return vim.inspect(data.stack)
 end
 
----@return table<string, string>
+---@return table<string, table<string>>
 ops.hidden_inspect = function()
+    -- local buffers = {}
+    -- local dict = data.hidden.toggle.buffers
+    -- for k, v in pairs(dict) do
+    --     buffers[k] = vim.inspect(v)
+    -- end
     return {
         stack = vim.inspect(data.hidden.stack),
-        toggle = vim.inspect(data.hidden.toggle.slot)
+        toggle = {
+            slot = vim.inspect(data.hidden.toggle.slot),
+            buffers = vim.inspect(data.hidden.toggle.buffers)
+
+        }
     }
 end
 

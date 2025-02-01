@@ -192,11 +192,11 @@ describe('window.lua', function()
             win.toggle_group()
 
             -- toggle slot should be empty
-            assert.equals('{}', manager.hidden_inspect().toggle, "toggle slot should be empty after second toggle.")
+            assert.equals('{}', manager.hidden_inspect().toggle.slot, "toggle slot should be empty after second toggle.")
             -- main stack should contain 'expected'
             assert.equals(1, manager.get_len(),
                 "main stack should be length 1 after second toggle, " ..
-                " toggle slot - " .. manager.hidden_inspect().toggle .. ", main stack - " .. manager.inspect())
+                " toggle slot - " .. manager.hidden_inspect().toggle.slot .. ", main stack - " .. manager.inspect())
             assert.equals(expected, manager.inspect(),
                 "main stack should contain group captured in 'expected'")
         end)
@@ -204,7 +204,58 @@ describe('window.lua', function()
 
     describe('toggle_persistent_group()', function()
         it('should successfully toggle the group and persist it in a toggle buffer.', function()
-            -- TODO
+            local opts = {
+                win_config = {
+                    buf = 0,
+                    row = 0,
+                    col = 0,
+                    height = 50,
+                    width = 50,
+                }
+            }
+            local window1 = win.create_floating_window(opts)
+            opts = {
+                win_config = {
+                    buf = 0,
+                    row = 51,
+                    col = 51,
+                    height = 50,
+                    width = 50,
+                }
+            }
+            local window2 = win.create_floating_window(opts)
+
+            windows = {
+                [1] = {
+                    buf = 0,
+                    pos = { 0, 0 },
+                    height = 50,
+                    width = 50,
+                },
+                [2] = {
+                    buf = 0,
+                    pos = { 51, 51 },
+                    height = 50,
+                    width = 50,
+                }
+            }
+
+            local grp = manager.peek()
+            manager.set_toggle_buffer(0, grp)
+            local expected = vim.inspect(grp.members)
+            win.toggle_persisted_group(0)
+
+            -- toggle should empty the stack with first call
+            assert.equals(0, manager.get_len(), "main stack should be empty after first toggle.")
+            -- toggle slot should now be occupied
+            local actual_buffers = manager.hidden_inspect().toggle.buffers
+            -- vim.inspect is in fact a pain, so we need to clean up the strings.
+            actual_buffers = actual_buffers:gsub("%s+", " "):gsub("^%s*(.-)%s*$", "%1")
+            expected = expected:gsub("%s+", " "):gsub("^%s*(.-)%s*$", "%1")
+
+            assert(string.find(actual_buffers, expected, 1, true),
+                "toggle buffer should be occupied with group that was originally in the main stack. ACTUAL BUFFERS: " ..
+                actual_buffers .. "EXPECTED: " .. expected)
         end)
     end)
 end)

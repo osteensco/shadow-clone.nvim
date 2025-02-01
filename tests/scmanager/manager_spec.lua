@@ -111,14 +111,14 @@ describe('manager/internal.lua', function()
             manager.toggle_last_accessed_group()
 
             assert(manager.hidden_toggle_slot_occupied(), "toggle slot should be occupied after first function call.")
-            assert.are.same(vim.inspect({ group }), manager.hidden_inspect().toggle,
+            assert.are.same(vim.inspect({ group }), manager.hidden_inspect().toggle.slot,
                 "toggle slot group should be the group we initialized after first function call.")
 
             manager.toggle_last_accessed_group()
 
             assert(not manager.hidden_toggle_slot_occupied(),
                 "toggle slot should not be occupied after second function call.")
-            assert.are.same('{}', manager.hidden_inspect().toggle,
+            assert.are.same('{}', manager.hidden_inspect().toggle.slot,
                 "toggle slot should not be occupied after second function call.")
         end)
 
