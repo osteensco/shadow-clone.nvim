@@ -193,14 +193,32 @@ describe('manager/internal.lua', function()
         assert.are.same(group.members[1], win2)
     end)
 
-    it('manager.set_toggle_buffer() should allocated a buffer to a group', function()
-        --TODO
+    it('manager.set_toggle_buffer() should allocate a buffer to a group', function()
+        local group = manager.new_group()
+        local win1 = { bufnr = 1, win = 2, anchor = { x = 0, y = 0 } }
+        local win2 = { bufnr = 3, win = 4, anchor = { x = 10, y = 10 } }
+
+        manager.add_to_group(group, win1)
+        manager.add_to_group(group, win2)
+
+        manager.set_toggle_buffer(0, group)
+        assert.are.same(manager.get_toggle_buffer(0), group, "The group in toggle buffer 0 should be the one we created.")
     end)
+
     it('manager.clear_toggle_buffer() should deallocate an allocated toggle buffer', function()
-        --TODO
-    end)
-    it('manager.get_toggle_buffer() should return the group persisted in a given buffer', function()
-        --TODO
+        local group = manager.new_group()
+        local win1 = { bufnr = 1, win = 2, anchor = { x = 0, y = 0 } }
+        local win2 = { bufnr = 3, win = 4, anchor = { x = 10, y = 10 } }
+
+        manager.add_to_group(group, win1)
+        manager.add_to_group(group, win2)
+
+        manager.set_toggle_buffer(0, group)
+        manager.clear_toggle_buffer(0)
+
+        local success, res = pcall(manager.get_toggle_buffer, 0)
+        assert.is_false(success,
+            "This function call should return an error because the buffer should not be allocated. Instead got : " .. res)
     end)
 end)
 

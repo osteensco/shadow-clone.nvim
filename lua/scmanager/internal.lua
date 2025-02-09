@@ -42,6 +42,7 @@ local function init_mngr()
         -- Maintains window and group configurations that aren't visibile but the user would like to reproduce at a later time.
         -- The toggle slot is an array that should never exceed a length of 1. This is a volatile slot that clears after each unhide toggle.
         -- The toggle buffers is a series of persisted slots that can only be explicitly cleared or altered.
+        -- Toggle buffers will always be assigned an integer.
         hidden = {
             stack = {},
             toggle = {
@@ -139,11 +140,10 @@ end
 
 
 
----Hidden stack operations
 
-ops.hidden_get_len = function()
-    return #data.hidden.stack
-end
+
+---Toggle Buffers
+--- These are operations for the buffers that house toggleable groups.
 
 ---@param bufnr integer
 ---@param group WinGroup
@@ -180,6 +180,15 @@ ops.toggle_persisted_group = function(bufnr)
     return group, true
 end
 
+
+
+
+---Hidden stack operations
+
+ops.hidden_get_len = function()
+    return #data.hidden.stack
+end
+
 ops.hidden_toggle_slot_occupied = function()
     assert(#data.hidden.toggle.slot < 2,
         "the hidden toggle slot should never be more than 1. data.hidden.toggle.slot - ",
@@ -210,6 +219,7 @@ ops.hide_top_group = function()
 end
 
 ---toggle last accessed group
+---uses the toggle slot
 ---@return WinGroup, boolean
 ops.toggle_last_accessed_group = function()
     local group
