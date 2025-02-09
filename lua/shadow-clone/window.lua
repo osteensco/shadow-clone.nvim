@@ -126,8 +126,10 @@ win.toggle_persisted_group = function(bufnr)
     end
 end
 
--- TODO
---  - Add toggle_assign_buffer(group, bufnr)
+-- Allocate a toggle buffer to a given group.
+win.toggle_assign_buffer = function(group, bufnr)
+    manager.set_toggle_buffer(group, bufnr)
+end
 
 
 
