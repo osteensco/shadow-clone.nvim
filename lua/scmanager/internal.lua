@@ -326,6 +326,11 @@ ops.hidden_inspect = function()
     }
 end
 
+---@return WinGroup[]
+ops.list_hidden = function()
+    return data.hidden.stack
+end
+
 ---Removes all floating windows from shadow-clone's data structure.
 ops.clear = function()
     data = init_mngr()

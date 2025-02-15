@@ -105,7 +105,7 @@ win.hide_group = function()
     decon_group(group)
 end
 
---  Open the group currently in the toggle slot or move the group from the top of the stack to the toggle slot.
+-- Open the group currently in the toggle slot or move the group from the top of the stack to the toggle slot.
 win.toggle_group = function()
     local group, toggle_occupied = manager.toggle_last_accessed_group()
     if toggle_occupied then
@@ -130,6 +130,8 @@ end
 win.toggle_assign_buffer = function(group, bufnr)
     manager.set_toggle_buffer(group, bufnr)
 end
+
+
 
 
 
