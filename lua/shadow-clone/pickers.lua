@@ -27,17 +27,20 @@ end
 local function generate_window_preview(group)
     if not group or not group.members then return "No windows in this group" end
 
+    -- TODO
+    --  - Show position in hidden stack instead of zindex
     local lines = { "Window Layout Preview:", string.format("Z-Index: %d", group.zindex), "" }
-    for _, win in ipairs(group.members) do
+    for i, win in ipairs(group.members) do
         -- TODO
-        --  - show buffers filepath
         --  - show preview of buffer if possible
         table.insert(lines,
-            string.format("Buf: %d | Pos: (%d, %d) | %dx%d", win.bufnr, win.anchor[1], win.anchor[2], win.width, win
+            string.format("Win %d:\nFile: %s \n| Buf: %d | Anchor: (%d, %d) | Size: %dx%d |", i,
+                vim.api.nvim_buf_get_name(win.bufnr),
+                win.bufnr, win.anchor[1], win.anchor[2], win.width, win
                 .height))
     end
 
-    return table.concat(lines, "\n")
+    return table.concat(lines, "\n\n")
 end
 
 local function pick_hidden_windows()
@@ -63,8 +66,19 @@ local function pick_hidden_windows()
         sorter = conf.generic_sorter({}),
         previewer = previewers.new_buffer_previewer({
             define_preview = function(self, entry, status)
-                local preview_text = generate_window_preview(entry.value)
-                vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, vim.split(preview_text, "\n"))
+                for _, group in ipairs(entry.value) do
+                    -- TODO
+                    --  - WIP for actual buffer preview. may not end up making sense to do
+                    print("!!!!!! - " .. vim.api.inspect(group))
+                    local preview_text = generate_window_preview(group)
+                    vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, vim.split(preview_text, "\n"))
+                    if vim.api.nvim_buf_is_valid(group.bufnr) then
+                        vim.api.nvim_buf_set_option(self.state.bufnr, "modifiable", true)
+                        vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false,
+                            vim.api.nvim_buf_get_lines(group.bufnr, 0, -1, false))
+                        vim.api.nvim_buf_set_option(self.state.bufnr, "modifiable", false)
+                    end
+                end
             end,
         }),
         attach_mappings = function(prompt_bufnr, map)
