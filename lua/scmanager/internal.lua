@@ -218,6 +218,12 @@ ops.hide_top_group = function()
     ops.hide_group_windows(group)
 end
 
+---Move a group from the hidden stack to the top of the main stack
+ops.unhide_group = function(group)
+    -- TODO
+    --  - implement this
+end
+
 ---toggle last accessed group
 ---uses the toggle slot
 ---@return WinGroup, boolean

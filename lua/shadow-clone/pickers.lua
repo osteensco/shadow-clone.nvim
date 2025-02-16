@@ -6,10 +6,12 @@ local action_state = require("telescope.actions.state")
 local previewers = require("telescope.previewers")
 
 local manager = require("scmanager")
+local window = require("shadow-clone.window")
 
 local function unhide_group(selected_group)
     -- TODO
     --  - fix this
+    --  - this should only need window.unhide_group, manager calls should be in this function
 
     local max_zindex = 0
     for _, group in ipairs(manager.list_hidden()) do

@@ -105,6 +105,12 @@ win.hide_group = function()
     manager.hide_top_group()
 end
 
+-- Unhide a group
+win.unhide_group = function(group)
+    -- TODO
+    --  - implement this
+end
+
 -- Open the group currently in the toggle slot or move the group from the top of the stack to the toggle slot.
 win.toggle_group = function()
     local group, toggle_occupied = manager.toggle_last_accessed_group()
