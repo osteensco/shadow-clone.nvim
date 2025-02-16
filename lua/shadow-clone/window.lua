@@ -101,8 +101,8 @@ end
 -- Move the current group to a hidden state.
 win.hide_group = function()
     local group = manager.peek()
-    manager.hide_top_group()
     decon_group(group)
+    manager.hide_top_group()
 end
 
 -- Open the group currently in the toggle slot or move the group from the top of the stack to the toggle slot.
