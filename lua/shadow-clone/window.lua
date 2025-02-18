@@ -101,6 +101,9 @@ end
 -- Move the current group to a hidden state.
 win.hide_group = function()
     local group = manager.peek()
+    if group == {} then
+        return
+    end
     decon_group(group)
     manager.hide_top_group()
 end

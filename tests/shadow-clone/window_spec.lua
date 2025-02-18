@@ -202,7 +202,7 @@ describe('window.lua', function()
         end)
     end)
 
-    describe('toggle_persistent_group()', function()
+    describe('toggle_persisted_group()', function()
         it('should successfully toggle the group and persist it in a toggle buffer.', function()
             local opts = {
                 win_config = {
@@ -249,7 +249,7 @@ describe('window.lua', function()
             assert.equals(0, manager.get_len(), "main stack should be empty after first toggle.")
             -- toggle slot should now be occupied
             local actual_buffers = manager.hidden_inspect().toggle.buffers
-            -- vim.inspect is in fact a pain, so we need to clean up the strings.
+            -- vim.inspect can produce inconsistent formatting, so we need to clean up the strings
             actual_buffers = actual_buffers:gsub("%s+", " "):gsub("^%s*(.-)%s*$", "%1")
             expected = expected:gsub("%s+", " "):gsub("^%s*(.-)%s*$", "%1")
 

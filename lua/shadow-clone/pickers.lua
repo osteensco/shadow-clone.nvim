@@ -8,6 +8,12 @@ local previewers = require("telescope.previewers")
 local manager = require("scmanager")
 local window = require("shadow-clone.window")
 
+
+
+local pick = {}
+
+
+
 local function unhide_group(selected_group)
     -- TODO
     --  - fix this
@@ -21,29 +27,36 @@ local function unhide_group(selected_group)
     end
 
     selected_group.zindex = max_zindex + 1
-    print("Unhid WinGroup at highest zindex:", selected_group.zindex)
+    print("Unhid WinGroup :", selected_group.zindex)
 end
 
-local function generate_window_preview(group)
+local function generate_preview_contents(group)
     if not group or not group.members then return "No windows in this group" end
 
-    -- TODO
-    --  - Show position in hidden stack instead of zindex
-    local lines = { "Window Layout Preview:", string.format("Z-Index: %d", group.zindex), "" }
+    local lines = {}
     for i, win in ipairs(group.members) do
         -- TODO
-        --  - show preview of buffer if possible
+        --  - figure out if adding highlighting within each window in the preview is possible
         table.insert(lines,
             string.format("Win %d:\nFile: %s \n| Buf: %d | Anchor: (%d, %d) | Size: %dx%d |", i,
                 vim.api.nvim_buf_get_name(win.bufnr),
                 win.bufnr, win.anchor[1], win.anchor[2], win.width, win
                 .height))
+        table.insert(lines, "__________________________________________________")
+        local cursor_pos = vim.api.nvim_buf_get_mark(win.bufnr, '"')
+        table.insert(lines,
+            table.concat(vim.api.nvim_buf_get_lines(win.bufnr, cursor_pos[1], cursor_pos[1] + 9, false), "\n"))
+        table.insert(lines, "__________________________________________________")
     end
 
-    return table.concat(lines, "\n\n")
+    return table.concat(lines, "\n")
 end
 
-local function pick_hidden_windows()
+
+
+
+
+pick.hidden_windows = function()
     local hidden_groups = manager.list_hidden()
 
     if #hidden_groups == 0 then
@@ -52,33 +65,28 @@ local function pick_hidden_windows()
     end
 
     pickers.new({}, {
-        prompt_title = "Select Hidden Windows",
+        prompt_title = "Select Hidden Group",
         finder = finders.new_table({
             results = hidden_groups,
             entry_maker = function(group)
+                -- TODO
+                --  - make display show pipe delimited file names from the group
+                --      - ex. myproject/dir/file.txt | some/help/docs/file.md
+                --  - figure out if I can get the index of the item getting passed to this function
+                --      - lazily adjust hidden groups to have a pos field that labels its position in the stack
                 return {
                     value = group,
-                    display = string.format("Group: %d windows, %s", #group.members, vim.inspect(group.members)),
+                    display = string.format("Group: %d windows", #group.members),
                     ordinal = tostring(group.zindex),
                 }
             end,
         }),
-        sorter = conf.generic_sorter({}),
+        sorter = conf.generic_sorter(),
         previewer = previewers.new_buffer_previewer({
+            title = "Hidden Group Preview",
             define_preview = function(self, entry, status)
-                for _, group in ipairs(entry.value) do
-                    -- TODO
-                    --  - WIP for actual buffer preview. may not end up making sense to do
-                    print("!!!!!! - " .. vim.api.inspect(group))
-                    local preview_text = generate_window_preview(group)
-                    vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, vim.split(preview_text, "\n"))
-                    if vim.api.nvim_buf_is_valid(group.bufnr) then
-                        vim.api.nvim_buf_set_option(self.state.bufnr, "modifiable", true)
-                        vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false,
-                            vim.api.nvim_buf_get_lines(group.bufnr, 0, -1, false))
-                        vim.api.nvim_buf_set_option(self.state.bufnr, "modifiable", false)
-                    end
-                end
+                local preview_text = generate_preview_contents(entry.value)
+                vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, vim.split(preview_text, "\n"))
             end,
         }),
         attach_mappings = function(prompt_bufnr, map)
@@ -94,4 +102,7 @@ local function pick_hidden_windows()
     }):find()
 end
 
-pick_hidden_windows()
+
+
+pick.hidden_windows()
+-- return pick
