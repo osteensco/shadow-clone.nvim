@@ -42,11 +42,13 @@ local function generate_preview_contents(group)
                 vim.api.nvim_buf_get_name(win.bufnr),
                 win.bufnr, win.anchor[1], win.anchor[2], win.width, win
                 .height))
-        table.insert(lines, "__________________________________________________")
+        table.insert(lines,
+            "____________________________________________________________________________________________________")
         local cursor_pos = vim.api.nvim_buf_get_mark(win.bufnr, '"')
         table.insert(lines,
             table.concat(vim.api.nvim_buf_get_lines(win.bufnr, cursor_pos[1], cursor_pos[1] + 9, false), "\n"))
-        table.insert(lines, "__________________________________________________")
+        table.insert(lines,
+            "____________________________________________________________________________________________________")
     end
 
     return table.concat(lines, "\n")
@@ -56,12 +58,17 @@ end
 
 
 
-pick.hidden_windows = function()
+pick.hidden_windows = function(opts)
+    opts = opts or {}
     local hidden_groups = manager.list_hidden()
 
     if #hidden_groups == 0 then
-        print("No hidden windows to show.")
+        print("No groups in the hidden stack.")
         return
+    end
+
+    for i, grp in ipairs(hidden_groups) do
+        grp.pos = i
     end
 
     pickers.new({}, {
@@ -69,15 +76,19 @@ pick.hidden_windows = function()
         finder = finders.new_table({
             results = hidden_groups,
             entry_maker = function(group)
-                -- TODO
-                --  - make display show pipe delimited file names from the group
-                --      - ex. myproject/dir/file.txt | some/help/docs/file.md
-                --  - figure out if I can get the index of the item getting passed to this function
-                --      - lazily adjust hidden groups to have a pos field that labels its position in the stack
+                local display_filenames = ""
+                for _, win in ipairs(group.members) do
+                    local filename = vim.api.nvim_buf_get_name(win.bufnr)
+                    display_filenames = display_filenames .. " | " .. filename
+                end
+
+                local entry = string.format("%d", group.pos) .. display_filenames
+
+
                 return {
                     value = group,
-                    display = string.format("Group: %d windows", #group.members),
-                    ordinal = tostring(group.zindex),
+                    display = entry,
+                    ordinal = entry,
                 }
             end,
         }),
@@ -99,6 +110,7 @@ pick.hidden_windows = function()
             end)
             return true
         end,
+        default_selection_index = #hidden_groups,
     }):find()
 end
 
