@@ -37,18 +37,27 @@ local function generate_preview_contents(group)
     for i, win in ipairs(group.members) do
         -- TODO
         --  - figure out if adding highlighting within each window in the preview is possible
+        local cursor_pos = vim.api.nvim_buf_get_mark(win.bufnr, '"')
+        local start_line, end_line = cursor_pos[1], cursor_pos[1] + 9
+        local filepath = vim.api.nvim_buf_get_name(win.bufnr)
+        local filetype = vim.bo[win.bufnr].filetype
+
         table.insert(lines,
-            string.format("Win %d:\nFile: %s \n| Buf: %d | Anchor: (%d, %d) | Size: %dx%d |", i,
-                vim.api.nvim_buf_get_name(win.bufnr),
+            string.format("File: %s \n| Buf: %d | Anchor: (%d, %d) | Size: %dx%d |",
+                filepath,
                 win.bufnr, win.anchor[1], win.anchor[2], win.width, win
                 .height))
         table.insert(lines,
             "____________________________________________________________________________________________________")
-        local cursor_pos = vim.api.nvim_buf_get_mark(win.bufnr, '"')
+
+        table.insert(lines, string.format("```" .. filetype))
         table.insert(lines,
-            table.concat(vim.api.nvim_buf_get_lines(win.bufnr, cursor_pos[1], cursor_pos[1] + 9, false), "\n"))
+            table.concat(vim.api.nvim_buf_get_lines(win.bufnr, start_line, end_line, false), "\n"))
+        table.insert(lines, "```")
+
+
         table.insert(lines,
-            "____________________________________________________________________________________________________")
+            "____________________________________________________________________________________________________\n")
     end
 
     return table.concat(lines, "\n")
@@ -98,6 +107,9 @@ pick.hidden_windows = function(opts)
             define_preview = function(self, entry, status)
                 local preview_text = generate_preview_contents(entry.value)
                 vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, vim.split(preview_text, "\n"))
+                vim.bo[self.state.bufnr].filetype = "markdown"
+
+                vim.api.nvim_set_option_value('conceallevel', 2, { win = self.state.winid })
             end,
         }),
         attach_mappings = function(prompt_bufnr, map)
