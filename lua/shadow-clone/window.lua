@@ -108,10 +108,17 @@ win.hide_group = function()
     manager.hide_top_group()
 end
 
--- Unhide a group
+---Unhide a provided group
+---@param group WinGroup
 win.unhide_group = function(group)
-    -- TODO
-    --  - implement this
+    -- - TODO
+    --     - better assertion
+    --     - ensure updating the group this way works (the zindex should be updated and applied for the recon_group() call)
+    if group == {} then
+        return
+    end
+    manager.unhide_group(group)
+    recon_group(group)
 end
 
 -- Open the group currently in the toggle slot or move the group from the top of the stack to the toggle slot.

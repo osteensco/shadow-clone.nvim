@@ -14,29 +14,11 @@ local pick = {}
 
 
 
-local function unhide_group(selected_group)
-    -- TODO
-    --  - fix this
-    --  - this should only need window.unhide_group, manager calls should be in this function
-
-    local max_zindex = 0
-    for _, group in ipairs(manager.list_hidden()) do
-        if group.zindex > max_zindex then
-            max_zindex = group.zindex
-        end
-    end
-
-    selected_group.zindex = max_zindex + 1
-    print("Unhid WinGroup :", selected_group.zindex)
-end
-
 local function generate_preview_contents(group)
     if not group or not group.members then return "No windows in this group" end
 
     local lines = {}
     for i, win in ipairs(group.members) do
-        -- TODO
-        --  - figure out if adding highlighting within each window in the preview is possible
         local cursor_pos = vim.api.nvim_buf_get_mark(win.bufnr, '"')
         local start_line, end_line = cursor_pos[1], cursor_pos[1] + 9
         local filepath = vim.api.nvim_buf_get_name(win.bufnr)
@@ -117,7 +99,7 @@ pick.hidden_windows = function(opts)
                 local selection = action_state.get_selected_entry()
                 if selection then
                     actions.close(prompt_bufnr)
-                    unhide_group(selection.value)
+                    window.unhide_group(selection.value)
                 end
             end)
             return true

@@ -12,6 +12,7 @@
 ---@class WinGroup
 ---@field members WinObj[]
 ---@field zindex number
+---@field id number
 ---@field toggle_bufnr? integer
 
 ---@class ToggleTable
@@ -25,6 +26,17 @@
 ---@class DataTable
 ---@field stack WinGroup[]
 ---@field hidden HiddenTable
+---@field id_gen number
+---@field new_id function
+
+
+
+---Provides ids for simpler group comparisons
+---@return number
+local new_id = function(self)
+    self.id_gen = self.id_gen + 1
+    return self.id_gen
+end
 
 ---@return DataTable
 local function init_mngr()
@@ -51,7 +63,9 @@ local function init_mngr()
                     -- [0] = {},
                 }
             }
-        }
+        },
+        id_gen = 0,
+        new_id = new_id
     }
 end
 
@@ -220,8 +234,16 @@ end
 
 ---Move a group from the hidden stack to the top of the main stack
 ops.unhide_group = function(group)
-    -- TODO
-    --  - implement this
+    local grp = nil
+    for i, g in ipairs(data.hidden) do
+        if g.id == group.id then
+            grp = table.remove(data.hidden, i)
+        end
+    end
+
+    if grp ~= nil then
+        ops.push(grp)
+    end
 end
 
 ---toggle last accessed group
@@ -253,7 +275,7 @@ end
 ---creates a new WinGroup
 ---@return WinGroup
 ops.new_group = function()
-    return { members = {}, zindex = 0, toggle_buffer = nil }
+    return { members = {}, zindex = 0, toggle_buffer = nil, id = data:new_id() }
 end
 
 ---adds window object to a group
