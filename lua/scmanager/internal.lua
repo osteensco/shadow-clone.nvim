@@ -12,6 +12,7 @@
 ---@class WinGroup
 ---@field members WinObj[]
 ---@field zindex number
+---@field id number
 ---@field toggle_bufnr? integer
 
 ---@class ToggleTable
@@ -25,6 +26,17 @@
 ---@class DataTable
 ---@field stack WinGroup[]
 ---@field hidden HiddenTable
+---@field id_gen number
+---@field new_id function
+
+
+
+---Provides ids for simpler group comparisons
+---@return number
+local new_id = function(self)
+    self.id_gen = self.id_gen + 1
+    return self.id_gen
+end
 
 ---@return DataTable
 local function init_mngr()
@@ -51,7 +63,9 @@ local function init_mngr()
                     -- [0] = {},
                 }
             }
-        }
+        },
+        id_gen = 0,
+        new_id = new_id
     }
 end
 
@@ -185,10 +199,12 @@ end
 
 ---Hidden stack operations
 
+---@return number
 ops.hidden_get_len = function()
     return #data.hidden.stack
 end
 
+---@return boolean
 ops.hidden_toggle_slot_occupied = function()
     assert(#data.hidden.toggle.slot < 2,
         "the hidden toggle slot should never be more than 1. data.hidden.toggle.slot - ",
@@ -201,6 +217,7 @@ ops.hidden_toggle_slot_occupied = function()
     return true
 end
 
+---@return WinGroup
 ops.hidden_pop = function()
     local group
     local length = ops.hidden_get_len()
@@ -210,12 +227,36 @@ ops.hidden_pop = function()
     return group
 end
 
+---@return WinGroup
+ops.hidden_peek = function()
+    local length = ops.hidden_get_len()
+    if length < 1 then
+        return {}
+    end
+    return data.hidden.stack[length]
+end
+
 ---hide highest zindex group
 ops.hide_top_group = function()
     local group = ops.pop()
     group.zindex = 0
     table.insert(data.hidden.stack, group)
     ops.hide_group_windows(group)
+end
+
+---Move a group from the hidden stack to the top of the main stack
+ops.unhide_group = function(group)
+    local grp = nil
+    for i, g in ipairs(data.hidden.stack) do
+        if g.id == group.id then
+            grp = table.remove(data.hidden.stack, i)
+            break
+        end
+    end
+
+    if grp ~= nil then
+        ops.push(grp)
+    end
 end
 
 ---toggle last accessed group
@@ -247,7 +288,7 @@ end
 ---creates a new WinGroup
 ---@return WinGroup
 ops.new_group = function()
-    return { members = {}, zindex = 0, toggle_buffer = nil }
+    return { members = {}, zindex = 0, toggle_buffer = nil, id = data:new_id() }
 end
 
 ---adds window object to a group
@@ -324,6 +365,11 @@ ops.hidden_inspect = function()
 
         }
     }
+end
+
+---@return WinGroup[]
+ops.list_hidden = function()
+    return data.hidden.stack
 end
 
 ---Removes all floating windows from shadow-clone's data structure.

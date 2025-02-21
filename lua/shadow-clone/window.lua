@@ -101,11 +101,33 @@ end
 -- Move the current group to a hidden state.
 win.hide_group = function()
     local group = manager.peek()
-    manager.hide_top_group()
+    if group == {} then
+        return
+    end
     decon_group(group)
+    manager.hide_top_group()
 end
 
---  Open the group currently in the toggle slot or move the group from the top of the stack to the toggle slot.
+---Unhide a provided group
+---@param group WinGroup
+win.unhide_group = function(group)
+    assert(group.members,
+        "Group being moved to main stack should have at least two fields (id, members), got - " .. vim.inspect(group))
+    assert(group.id,
+        "Group being moved to main stack should have at least two fields (id, members), got - " .. vim.inspect(group))
+    manager.unhide_group(group)
+    recon_group(group)
+end
+
+---Unhide top group, places group top of main stack
+win.unhide_top = function()
+    local group = manager.hidden_peek()
+    if group ~= {} then
+        win.unhide_group(group)
+    end
+end
+
+-- Open the group currently in the toggle slot or move the group from the top of the stack to the toggle slot.
 win.toggle_group = function()
     local group, toggle_occupied = manager.toggle_last_accessed_group()
     if toggle_occupied then
@@ -130,6 +152,8 @@ end
 win.toggle_assign_buffer = function(group, bufnr)
     manager.set_toggle_buffer(group, bufnr)
 end
+
+
 
 
 
