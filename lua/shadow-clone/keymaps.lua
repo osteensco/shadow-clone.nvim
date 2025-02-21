@@ -10,8 +10,10 @@ keymaps.init = function()
         { desc = "Split current floating window horizontally." })
     vim.api.nvim_set_keymap('n', '<leader>fv', '<cmd>SCvsplit<CR>',
         { desc = "Split current floating window vertically." })
-    vim.api.nvim_set_keymap('n', '<leader>fh', '<cmd>SChide<CR>',
+    vim.api.nvim_set_keymap('n', '<leader>f,', '<cmd>SChide<CR>',
         { desc = "Hide the current group. Places group in shadow-clone's hidden buffer." })
+    vim.api.nvim_set_keymap('n', '<leader>f.', '<cmd>SCunhidetop<CR>',
+        { desc = "Unhides the last hidden group. Places group at the top of shadow-clone's main stack." })
     vim.api.nvim_set_keymap('n', '<leader>ft', '<cmd>SCtoggle<CR>',
         { desc = "Toggle the current group. If a group has already been toggle it will display that group." })
 end
