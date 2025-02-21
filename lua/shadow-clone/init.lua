@@ -18,8 +18,12 @@ M.win = {
     new = window.create_floating_window,
     group = {
         hide = window.hide_group,
+        unhide = window.unhide_group,
+        unhidetop = window.unhide_top,
         toggle = window.toggle_group,
-        togglebuf = window.toggle_persisted_group
+        togglebuf = window.toggle_persisted_group,
+        togglebufassign = window.toggle_assign_buffer,
+        getcurr = window.get_top_group,
     }
 }
 

@@ -1,6 +1,7 @@
 local win = require('shadow-clone.window')
 local nav = require('shadow-clone.navigation')
 local split = require('shadow-clone.split')
+local picker = require('shadow-clone.pickers')
 
 local cmds = {}
 
@@ -10,6 +11,7 @@ cmds.init = function()
     -- window/group management
     vim.api.nvim_create_user_command("SCwindow", win.create_floating_window, { nargs = '?' })
     vim.api.nvim_create_user_command("SChide", win.hide_group, { nargs = 0 })
+    vim.api.nvim_create_user_command("SCunhide", picker.hidden_windows, { nargs = 0 })
     vim.api.nvim_create_user_command("SCunhidetop", win.unhide_top, { nargs = 0 })
     vim.api.nvim_create_user_command("SCtoggle", win.toggle_group, { nargs = 0 })
 

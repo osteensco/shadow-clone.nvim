@@ -153,6 +153,11 @@ win.toggle_assign_buffer = function(group, bufnr)
     manager.set_toggle_buffer(group, bufnr)
 end
 
+---@return WinGroup
+win.get_top_group = function()
+    return manager.peek()
+end
+
 
 
 

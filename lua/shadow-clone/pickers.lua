@@ -110,5 +110,5 @@ end
 
 
 
-pick.hidden_windows()
--- return pick
+-- pick.hidden_windows()
+return pick
