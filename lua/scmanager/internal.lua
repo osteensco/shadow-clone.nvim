@@ -199,10 +199,12 @@ end
 
 ---Hidden stack operations
 
+---@return number
 ops.hidden_get_len = function()
     return #data.hidden.stack
 end
 
+---@return boolean
 ops.hidden_toggle_slot_occupied = function()
     assert(#data.hidden.toggle.slot < 2,
         "the hidden toggle slot should never be more than 1. data.hidden.toggle.slot - ",
@@ -215,6 +217,7 @@ ops.hidden_toggle_slot_occupied = function()
     return true
 end
 
+---@return WinGroup
 ops.hidden_pop = function()
     local group
     local length = ops.hidden_get_len()
@@ -222,6 +225,15 @@ ops.hidden_pop = function()
     group = table.remove(data.hidden.stack, length)
 
     return group
+end
+
+---@return WinGroup
+ops.hidden_peek = function()
+    local length = ops.hidden_get_len()
+    if length < 1 then
+        return {}
+    end
+    return data.hidden.stack[length]
 end
 
 ---hide highest zindex group
@@ -235,9 +247,10 @@ end
 ---Move a group from the hidden stack to the top of the main stack
 ops.unhide_group = function(group)
     local grp = nil
-    for i, g in ipairs(data.hidden) do
+    for i, g in ipairs(data.hidden.stack) do
         if g.id == group.id then
-            grp = table.remove(data.hidden, i)
+            grp = table.remove(data.hidden.stack, i)
+            break
         end
     end
 

@@ -149,6 +149,23 @@ describe('manager/internal.lua', function()
             assert.equals(0, manager.get_len())
         end)
 
+    it('manager.unhide_group() should move the provided group to the top of the main stack.',
+        function()
+            local group = manager.new_group()
+            manager.push(group)
+
+
+            manager.hide_top_group()
+
+            manager.unhide_group(group)
+            assert.equals(0, manager.hidden_get_len(),
+                "hidden stack should have length 0 - hidden stack: " .. vim.inspect(manager.hidden_inspect()))
+            assert.equals(1, manager.get_len(), "main stack should have length 1 - main stack: " .. manager.inspect())
+            assert.equals(manager.peek().id, group.id,
+                "the original group and the group from the top of the main stack should have the same id")
+        end
+    )
+
     it(
         'manager.toggle_last_accessed_group() should successfully move a group between the toggle slot and the top of the main stack.',
         function()

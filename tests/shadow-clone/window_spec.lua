@@ -137,6 +137,36 @@ describe('window.lua', function()
         end)
     end)
 
+    describe('unhide_group()', function()
+        it('should successfully unhide the group', function()
+            local opts = {
+                buf = 0,
+                row = 0,
+                col = 0,
+                height = 50,
+                width = 50,
+            }
+            local window1 = win.create_floating_window(opts)
+            opts = {
+                buf = 0,
+                row = 51,
+                col = 51,
+                height = 50,
+                width = 50,
+            }
+            local window2 = win.create_floating_window(opts)
+
+
+            local expected = manager.peek()
+
+            win.hide_group()
+
+            win.unhide_group(expected)
+
+            assert.are.same(vim.inspect({ expected }), vim.inspect(manager.peek()))
+        end)
+    end)
+
     describe('toggle_group()', function()
         it('should successfully toggle the group', function()
             local opts = {

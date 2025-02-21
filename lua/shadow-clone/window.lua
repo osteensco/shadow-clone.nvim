@@ -111,14 +111,20 @@ end
 ---Unhide a provided group
 ---@param group WinGroup
 win.unhide_group = function(group)
-    -- - TODO
-    --     - better assertion
-    --     - ensure updating the group this way works (the zindex should be updated and applied for the recon_group() call)
-    if group == {} then
-        return
-    end
+    assert(group.members,
+        "Group being moved to main stack should have at least two fields (id, members), got - " .. vim.inspect(group))
+    assert(group.id,
+        "Group being moved to main stack should have at least two fields (id, members), got - " .. vim.inspect(group))
     manager.unhide_group(group)
     recon_group(group)
+end
+
+---Unhide top group, places group top of main stack
+win.unhide_top = function()
+    local group = manager.hidden_peek()
+    if group ~= {} then
+        win.unhide_group(group)
+    end
 end
 
 -- Open the group currently in the toggle slot or move the group from the top of the stack to the toggle slot.
