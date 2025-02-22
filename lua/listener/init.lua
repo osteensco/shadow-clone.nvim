@@ -1,8 +1,0 @@
--- TODO
---  - implement floating window open/close listener
---  - use listener to add/remove floating windows from main stack
---  - figure out:
---      - how to distinguish shadow-clone's create floating window vs other sources
---      - how to handle something like telescope picker?
---  - implement buffer change listener
---  - when a group memember's buffer changes, this needs to be updated in the stack accordingly
