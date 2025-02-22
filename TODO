@@ -15,7 +15,7 @@ TODO
         [X] implement additional stack for hidden windows
             - between a hidden toggle 
             - ability to move a hidden group to the top of the main stack
-                - see ''telescope view' below
+                - see 'telescope view' below
         [X] option for permanent toggle
             - toggle group API
                 - this would allow for multiple specific keymaps (help docs, terminal, project configuration files, etc)
@@ -27,11 +27,13 @@ TODO
             - bubbleup / bubbledown
         [X] create/manage float groups
             - a float group should represent all floats contained on a given z access
-        [-] telescope view of groups (hidden and visible) for easy navigation
-            - config option to hide current visible windows
+        [X] telescope view of groups (hidden and visible) for easy navigation
+            - hidden picker implemented for now
         [-] "hide all" command
             - essentially just move entire main stack to hidden stack
         [-] opening a new floating window with one visible should place new float at top of z stack
+        [-] changing the buffer of a window in a group should be reflected in the internal data structure
+            - this requires listeners
         [-] should natively support/integrate other plugins that manage floating windows and buffer navigation
             - ex. toggleterm, arrow, harpoon, etc.
             - requires listeners to place floating windows in groups
