@@ -44,6 +44,12 @@ win.create_floating_window = function(opts)
 
     local winnr = vim.api.nvim_open_win(buf, true, win_config)
 
+
+
+    -- TODO
+    --  - break out logic that updates manager's stack into speparate function
+    --  - add custom window variable: vim.w[winnr].sc = true
+
     ---@type WinObj
     local window = {
         bufnr = buf,
