@@ -19,7 +19,7 @@ listener.init = function()
     vim.api.nvim_create_autocmd("BufWinEnter", {
         group = vim.api.nvim_create_augroup("shadow-clone-listener", { clear = true }),
         pattern = "*",
-        callback = function(opts)
+        callback = function()
             -- identify current window and ensure it's floating
             local winId = vim.api.nvim_get_current_win()
             local bufnr = vim.api.nvim_get_current_buf()

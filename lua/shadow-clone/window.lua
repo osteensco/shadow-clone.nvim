@@ -43,13 +43,25 @@ win.create_floating_window = function(opts)
     end
 
     local winnr = vim.api.nvim_open_win(buf, true, win_config)
-
-
+    -- id window as created by shadow-clone to avoid duplicate stack update via event listener
+    vim.w[winnr].sc = true
 
     -- TODO
     --  - break out logic that updates manager's stack into speparate function
-    --  - add custom window variable: vim.w[winnr].sc = true
+    --  - analyze this function vs recon_group. does the current state make sense? could we do better?
 
+    local window = win.add_window_to_stack(buf, winnr, win_config, opts)
+
+    return window
+end
+
+
+-- TODO
+--  - revisit naming of this function
+--  - verify it makes sense to do it this way
+--  - add tests
+---@return WinObj
+win.add_window_to_stack = function(buf, winnr, win_config, opts)
     ---@type WinObj
     local window = {
         bufnr = buf,
@@ -74,10 +86,6 @@ win.create_floating_window = function(opts)
 
     return window
 end
-
-
-
-
 
 ---Deconstruct a group's windows.
 ---@param group WinGroup
