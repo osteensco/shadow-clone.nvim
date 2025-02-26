@@ -6,6 +6,8 @@ local utils = require('shadow-clone.utils')
 
 local win = {}
 
+
+
 ---@class CreateFloatOpts
 ---@field buf? integer
 ---@field newgroup? boolean
@@ -43,49 +45,19 @@ win.create_floating_window = function(opts)
     end
 
     local winnr = vim.api.nvim_open_win(buf, true, win_config)
+
     -- id window as created by shadow-clone to avoid duplicate stack update via event listener
     vim.w[winnr].sc = true
 
-    -- TODO
-    --  - break out logic that updates manager's stack into speparate function
-    --  - analyze this function vs recon_group. does the current state make sense? could we do better?
-
-    local window = win.add_window_to_stack(buf, winnr, win_config, opts)
-
-    return window
-end
-
-
--- TODO
---  - revisit naming of this function
---  - verify it makes sense to do it this way
---  - add tests
----@return WinObj
-win.add_window_to_stack = function(buf, winnr, win_config, opts)
-    ---@type WinObj
-    local window = {
-        bufnr = buf,
-        win = winnr,
-        anchor = vim.api.nvim_win_get_position(winnr),
-        height = win_config.height,
-        width = win_config.width,
-    }
-
-    ---@type WinGroup
-    local group = manager.new_group()
-    if not opts.newgroup then
-        local g = manager.pop()
-        group = g or group
-    end
-    manager.add_to_group(group, window)
-    manager.push(group)
-
-    ---show additional info if in debug mode
-    local grp = manager.peek()
-    utils.debug_display(grp, window)
+    -- we cannot rely on the event listener to update the manager's stack when this function is called
+    -- because the split functionality has no way of knowing to populate the recently emptied group unless
+    -- we explicitly pass in the new_group argument for the manifest_window method. not doing it this way would
+    -- create a new group every time any split function was called.
+    local window = manager.manifest_window(buf, winnr, win_config, opts.newgroup)
 
     return window
 end
+
 
 ---Deconstruct a group's windows.
 ---@param group WinGroup

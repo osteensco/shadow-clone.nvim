@@ -1,3 +1,7 @@
+local utils = require('shadow-clone.utils')
+
+
+
 ---@class Anchor
 ---@field x number
 ---@field y number
@@ -245,6 +249,7 @@ ops.hide_top_group = function()
 end
 
 ---Move a group from the hidden stack to the top of the main stack
+---@param group WinGroup
 ops.unhide_group = function(group)
     local grp = nil
     for i, g in ipairs(data.hidden.stack) do
@@ -284,6 +289,41 @@ end
 
 
 --- Group Manipulation
+
+---Adds a window to a new group or to the group top of stack
+---@param buf number
+---@param winnr number
+---@param win_config vim.api.keyset.win_config
+---@param new_group boolean
+---@return WinObj
+ops.manifest_window = function(buf, winnr, win_config, new_group)
+    -- TODO
+    --  - add tests
+
+    ---@type WinObj
+    local window = {
+        bufnr = buf,
+        win = winnr,
+        anchor = vim.api.nvim_win_get_position(winnr),
+        height = win_config.height,
+        width = win_config.width,
+    }
+
+    ---@type WinGroup
+    local group = ops.new_group()
+    if not new_group then
+        local g = ops.pop()
+        group = g or group
+    end
+    ops.add_to_group(group, window)
+    ops.push(group)
+
+    ---show additional info if in debug mode
+    local grp = ops.peek()
+    utils.debug_display(grp, window)
+
+    return window
+end
 
 ---creates a new WinGroup
 ---@return WinGroup
