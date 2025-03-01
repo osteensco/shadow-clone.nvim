@@ -1,9 +1,3 @@
--- TODO
---  - circular import, needs to be addressed
--- local utils = require('shadow-clone.utils')
-
-
-
 ---@class Anchor
 ---@field x number
 ---@field y number
@@ -321,8 +315,8 @@ ops.manifest_window = function(buf, winnr, win_config, new_group)
     ops.push(group)
 
     ---show additional info if in debug mode
-    -- local grp = ops.peek()
-    -- utils.debug_display(grp, window)
+    local grp = ops.peek()
+    ops.display_info(grp, window)
 
     return window
 end
