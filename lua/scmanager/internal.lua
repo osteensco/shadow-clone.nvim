@@ -1,4 +1,6 @@
-local utils = require('shadow-clone.utils')
+-- TODO
+--  - circular import, needs to be addressed
+-- local utils = require('shadow-clone.utils')
 
 
 
@@ -319,8 +321,8 @@ ops.manifest_window = function(buf, winnr, win_config, new_group)
     ops.push(group)
 
     ---show additional info if in debug mode
-    local grp = ops.peek()
-    utils.debug_display(grp, window)
+    -- local grp = ops.peek()
+    -- utils.debug_display(grp, window)
 
     return window
 end
@@ -384,6 +386,24 @@ end
 
 
 -- Helpers
+
+---@param grp WinGroup
+---@param window WinObj
+ops.display_info = function(grp, window)
+    if require('shadow-clone').config.DEBUG then
+        local testconfig = {
+            title = "group: " ..
+                grp.zindex ..
+                " win: " ..
+                window.win ..
+                " - x: " ..
+                window.anchor[2] .. ", y: " .. window.anchor[1] ..
+                "| height: " .. window.height .. ", width: " .. window.width,
+            title_pos = "center"
+        }
+        vim.api.nvim_win_set_config(window.win, testconfig)
+    end
+end
 
 ---@return string
 ops.inspect = function()

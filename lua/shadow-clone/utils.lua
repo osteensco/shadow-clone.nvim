@@ -78,23 +78,10 @@ utils.get_types = function(window)
     return win_type, buf_type
 end
 
--- Display information helpful to debuggin on floating windows.
-utils.debug_display = function(grp, window)
-    if require('shadow-clone').config.DEBUG then
-        local testconfig = {
-            title = "group: " ..
-                grp.zindex ..
-                " win: " ..
-                window.win ..
-                " - x: " ..
-                window.anchor[2] .. ", y: " .. window.anchor[1] ..
-                "| height: " .. window.height .. ", width: " .. window.width,
-            title_pos = "center"
-        }
-        vim.api.nvim_win_set_config(window.win, testconfig)
-    end
-end
+-- Display information helpful to debuging on shadow-clone's floating windows.
+utils.debug_display = manager.display_info
 
+-- Display shadow-clone's data structure for debugging.
 utils.inspect = manager.inspect
 utils.inspect_hidden = manager.hidden_inspect
 
