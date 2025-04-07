@@ -29,7 +29,7 @@ win.create_floating_window = function(opts)
         col = pos.x,
         row = pos.y,
         style = "minimal",
-        border = "rounded",
+        border = "rounded", -- TODO add this option to opts.win_config
         -- TODO
         -- need highlight group for background
     }
