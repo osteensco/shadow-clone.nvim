@@ -1,5 +1,5 @@
 local manager = require('scmanager')
-
+local config = require('shadow-clone.config')
 
 -- Why Are Listeners Needed?
 -- PROBLEM:
@@ -46,13 +46,15 @@ listener.init = function()
             local win_config = vim.api.nvim_win_get_config(winId)
             -- we only care about floating windows
             if win_config.relative ~= "" then
-                -- identify current shadow-clone group
-                --
-                -- **ASSUPTION** any time a floating window's buffer changes, it should be part of the group at the top of the stack
-                --  - tests will need to verify this is always the case
+                -- return early if the window was created by shadow-clone
+                if vim.api.nvim_win_get_var(group.win, "sc") then
+                    return
+                end
+
+                -- The assumption is that any time a floating window's buffer changes, that window should be part of the group at the top of the stack
                 local group = manager.peek()
 
-                -- update buffer for given window in given group to switched buffer
+                -- To update the window we have to iterate through the group until we find it
                 local window_found = false
                 for _, win in ipairs(group.members) do
                     if win.win == winId then
@@ -62,6 +64,7 @@ listener.init = function()
                     end
                 end
 
+                -- Assert our previously mentioned assumption
                 assert(window_found, "Window with id " .. win.win .. "was not found in group top of stack.")
             end
         end
@@ -81,10 +84,10 @@ listener.init = function()
             -- we only care about floating windows
             if group.config.relative ~= "" then
                 -- return early if the window was created by shadow-clone
-                if vim.w[group.win] and vim.w[group.win].sc then
+                if vim.api.nvim_win_get_var(group.win, "sc") then
                     return
                 end
-
+                print("!!!!!!!!!!")
                 table.insert(listener.group_cache, group)
 
                 -- we want to check if a timer is already running and reset it
@@ -97,7 +100,7 @@ listener.init = function()
                 -- defer_fn returns our timer object
                 listener.group_timer = vim.defer_fn(function()
                     for _, g in ipairs(listener.group_cache) do
-                        manager.manifest_window(g.buf, g.win, g.config, true)
+                        manager.manifest_window(g.buf, g.win, g.config, true, config.DEBUG)
                     end
 
                     -- reset cache and timer

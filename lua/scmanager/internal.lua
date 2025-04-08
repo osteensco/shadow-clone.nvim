@@ -292,9 +292,10 @@ end
 ---@param win_config vim.api.keyset.win_config
 ---@param new_group boolean
 ---@return WinObj
-ops.manifest_window = function(buf, winnr, win_config, new_group)
+ops.manifest_window = function(buf, winnr, win_config, new_group, debug)
     -- TODO
     --  - add tests
+
 
     ---@type WinObj
     local window = {
@@ -308,15 +309,23 @@ ops.manifest_window = function(buf, winnr, win_config, new_group)
     ---@type WinGroup
     local group = ops.new_group()
     if not new_group then
+        -- use top group unless stack is empty then use newly created group
         local g = ops.pop()
         group = g or group
     end
-    ops.add_to_group(group, window)
+
+    -- check top group for existence of window
+    -- manifest_window can be called when a window moves from a hidden state,
+    -- in such a case it is already on the main stack
+    local _, exists = ops.query_group(group, winnr)
+    if not exists then
+        print("!!!!!!!! winnr - " .. winnr)
+        ops.add_to_group(group, window)
+    end
     ops.push(group)
 
     ---show additional info if in debug mode
-    local grp = ops.peek()
-    ops.display_info(grp, window)
+    ops.display_info(group, window, debug)
 
     return window
 end
@@ -381,10 +390,25 @@ end
 
 -- Helpers
 
+---@param group WinGroup
+---@param winid integer
+---@returns WinObj, boolean
+ops.query_group = function(group, winid)
+    for _, win in ipairs(group.members) do
+        if win.win == winid then
+            print("!!!!!!! query found winid - " .. winid)
+            return win, true
+        end
+        print("!!!!!! " .. win.win .. " != " .. winid)
+    end
+    return nil, false
+end
+
 ---@param grp WinGroup
 ---@param window WinObj
-ops.display_info = function(grp, window)
-    if require('shadow-clone').config.DEBUG then
+---@param debug boolean
+ops.display_info = function(grp, window, debug)
+    if debug then
         local testconfig = {
             title = "group: " ..
                 grp.zindex ..

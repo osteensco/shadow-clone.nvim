@@ -5,6 +5,7 @@ local mock = require('luassert.mock')
 local stub = require('luassert.stub')
 
 local windows = {}
+local window_vars = {}
 local buf_counter = 1
 local win_counter = 1
 
@@ -39,6 +40,10 @@ describe('window.lua', function()
         end)
         stub(vim.api, "nvim_win_get_position", function(winnr) return windows[winnr].pos end)
         stub(vim.api, "nvim_win_hide", function() if win_counter > 0 then win_counter = win_counter - 1 end end)
+        stub(vim.api, "nvim_win_set_var", function(winnr, name, val)
+            window_vars[winnr] = {}
+            window_vars[winnr][name] = val
+        end)
         manager.clear()
     end)
 
@@ -146,6 +151,7 @@ describe('window.lua', function()
                 height = 50,
                 width = 50,
             }
+            print("!!!! 1 !!!!")
             local window1 = win.create_floating_window(opts)
             opts = {
                 buf = 0,
@@ -154,15 +160,20 @@ describe('window.lua', function()
                 height = 50,
                 width = 50,
             }
+            print("!!!! 2 !!!!")
             local window2 = win.create_floating_window(opts)
 
 
+            print("!!!! 3 !!!!")
             local expected = manager.peek()
 
+            print("!!!! 4 !!!!")
             win.hide_group()
 
+            print("!!!! 5 !!!!")
             win.unhide_group(expected)
 
+            print("!!!! 6 !!!!")
             assert.are.same(vim.inspect({ expected }), vim.inspect(manager.peek()))
         end)
     end)
@@ -178,6 +189,7 @@ describe('window.lua', function()
                     width = 50,
                 }
             }
+            print("!!!! 7 !!!!")
             local window1 = win.create_floating_window(opts)
             opts = {
                 win_config = {

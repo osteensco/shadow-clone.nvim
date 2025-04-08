@@ -47,13 +47,13 @@ win.create_floating_window = function(opts)
     local winnr = vim.api.nvim_open_win(buf, true, win_config)
 
     -- id window as created by shadow-clone to avoid duplicate stack update via event listener
-    vim.w[winnr].sc = true
+    vim.api.nvim_win_set_var(winnr, "sc", true)
 
     -- we cannot rely on the event listener to update the manager's stack when this function is called
     -- because the split functionality has no way of knowing to populate the recently emptied group unless
     -- we explicitly pass in the new_group argument for the manifest_window method. not doing it this way would
     -- create a new group every time any split function was called.
-    local window = manager.manifest_window(buf, winnr, win_config, opts.newgroup)
+    local window = manager.manifest_window(buf, winnr, win_config, opts.newgroup, config.DEBUG)
 
     return window
 end
@@ -70,7 +70,10 @@ end
 ---Reconstruct a group's windows from a WinGroup object.
 ---@param group WinGroup
 local recon_group = function(group)
-    for _, w in ipairs(group.members) do
+    for i, w in ipairs(group.members) do
+        -- window needs to be removed from group so that the updated WinObj can be properly added back in
+        -- the window id is -1 while hidden, when a window is created this id is updated and so the entire object needs to be flushed and readded
+        manager.remove_from_group(group, w)
         win.create_floating_window({
             buf = w.bufnr,
             win_config = {
