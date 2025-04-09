@@ -50,6 +50,7 @@ describe("split.lua", function()
 
             return winnr
         end)
+        stub(vim.api, "nvim_win_set_var", function(winnr, sc, tru) end)
         stub(vim.fn, "win_gettype", function(window) return "popup" end)
     end)
 

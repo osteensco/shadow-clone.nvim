@@ -67,6 +67,7 @@ describe('navigation.lua', function()
         stub(vim.api, 'nvim_win_get_width', function() return 100 end)
         stub(vim.api, 'nvim_win_hide', function() current_win = current_win - 1 end)
         stub(vim.api, 'nvim_set_current_buf', function(bufnr) normal_wins[current_win].buf = bufnr end)
+        stub(vim.api, "nvim_win_set_var", function(winnr, sc, tru) end)
 
         mock(vim.cmd, function(split_type)
             if split_type == 'split' then

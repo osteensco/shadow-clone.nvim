@@ -366,7 +366,6 @@ ops.remove_from_group = function(group, window)
 
     if #group.members == 0 then
         -- assumption is this would only get called on group that is top of stack
-        -- will need adjusting if not always the case
         ops.pop()
     end
 end
