@@ -151,7 +151,6 @@ describe('window.lua', function()
                 height = 50,
                 width = 50,
             }
-            print("!!!! 1 !!!!")
             local window1 = win.create_floating_window(opts)
             opts = {
                 buf = 0,
@@ -160,21 +159,16 @@ describe('window.lua', function()
                 height = 50,
                 width = 50,
             }
-            print("!!!! 2 !!!!")
             local window2 = win.create_floating_window(opts)
 
 
-            print("!!!! 3 !!!!")
             local expected = manager.peek()
 
-            print("!!!! 4 !!!!")
             win.hide_group()
 
-            print("!!!! 5 !!!!")
             win.unhide_group(expected)
 
-            print("!!!! 6 !!!!")
-            assert.are.same(vim.inspect({ expected }), vim.inspect(manager.peek()))
+            assert.are.same(vim.inspect(expected), vim.inspect(manager.peek()))
         end)
     end)
 
@@ -189,7 +183,6 @@ describe('window.lua', function()
                     width = 50,
                 }
             }
-            print("!!!! 7 !!!!")
             local window1 = win.create_floating_window(opts)
             opts = {
                 win_config = {
@@ -217,7 +210,12 @@ describe('window.lua', function()
                 }
             }
 
-            local expected = vim.inspect({ manager.peek() })
+            -- group repopulation process after a toggle reverses the order of its members
+            local grp = manager.peek()
+            local expected = { id = 1, members = {}, zindex = 1 }
+            for _, w in ipairs(grp.members) do
+                table.insert(expected.members, 1, w)
+            end
 
 
             -- first toggle call
@@ -239,8 +237,8 @@ describe('window.lua', function()
             assert.equals(1, manager.get_len(),
                 "main stack should be length 1 after second toggle, " ..
                 " toggle slot - " .. manager.hidden_inspect().toggle.slot .. ", main stack - " .. manager.inspect())
-            assert.equals(expected, manager.inspect(),
-                "main stack should contain group captured in 'expected'")
+            assert.equals(vim.inspect({ expected }), manager.inspect(),
+                "main stack should contain group captured in 'expected' after second toggle call")
         end)
     end)
 

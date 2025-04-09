@@ -268,11 +268,8 @@ ops.toggle_last_accessed_group = function()
     local occupied = ops.hidden_toggle_slot_occupied()
 
     if occupied then
-        group = table.remove(data.hidden.toggle.slot, 1)
-        -- Add an empty new group to the main stack.
-        -- This will be hydrated with the group this function returns by window.recon_group.
-        local newgrp = ops.new_group()
-        ops.push(newgrp)
+        group = table.remove(data.hidden.toggle.slot)
+        ops.push(group)
     else
         group = ops.pop()
         group.zindex = 0
@@ -296,7 +293,6 @@ ops.manifest_window = function(buf, winnr, win_config, new_group, debug)
     -- TODO
     --  - add tests
 
-
     ---@type WinObj
     local window = {
         bufnr = buf,
@@ -319,7 +315,6 @@ ops.manifest_window = function(buf, winnr, win_config, new_group, debug)
     -- in such a case it is already on the main stack
     local _, exists = ops.query_group(group, winnr)
     if not exists then
-        print("!!!!!!!! winnr - " .. winnr)
         ops.add_to_group(group, window)
     end
     ops.push(group)
@@ -340,9 +335,7 @@ end
 ---@param group WinGroup
 ---@param window WinObj
 ops.add_to_group = function(group, window)
-    assert(group.members,
-        "A group attempting to be added to should have two fields (members, zindex), got - " .. vim.inspect(group))
-    assert(group.zindex,
+    assert(group.members and group.zindex,
         "A group attempting to be added to should have two fields (members, zindex), got - " .. vim.inspect(group))
     table.insert(group.members, window)
 end
@@ -396,10 +389,8 @@ end
 ops.query_group = function(group, winid)
     for _, win in ipairs(group.members) do
         if win.win == winid then
-            print("!!!!!!! query found winid - " .. winid)
             return win, true
         end
-        print("!!!!!! " .. win.win .. " != " .. winid)
     end
     return nil, false
 end

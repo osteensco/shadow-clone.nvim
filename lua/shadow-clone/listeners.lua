@@ -87,7 +87,7 @@ listener.init = function()
                 if vim.api.nvim_win_get_var(group.win, "sc") then
                     return
                 end
-                print("!!!!!!!!!!")
+
                 table.insert(listener.group_cache, group)
 
                 -- we want to check if a timer is already running and reset it
