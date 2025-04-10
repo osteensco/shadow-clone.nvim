@@ -34,11 +34,12 @@ listener.group_timer = nil
 listener.debounce_ms = 50
 
 listener.init = function()
+    local groupid = vim.api.nvim_create_augroup("shadow-clone-listener", { clear = true })
     -- listener for when a window's buffer is switched to a different buffer
     -- other event options:
-    --  - WinEnter, BufEnter
-    vim.api.nvim_create_autocmd("BufWinEnter", {
-        group = vim.api.nvim_create_augroup("shadow-clone-listener", { clear = true }),
+    --  - WinEnter, BufEnter, BufWinEnter
+    vim.api.nvim_create_autocmd("BufEnter", {
+        group = groupid,
         pattern = "*",
         callback = function()
             local winId = vim.api.nvim_get_current_win()
@@ -46,26 +47,14 @@ listener.init = function()
             local win_config = vim.api.nvim_win_get_config(winId)
             -- we only care about floating windows
             if win_config.relative ~= "" then
-                -- return early if the window was created by shadow-clone
-                if vim.api.nvim_win_get_var(group.win, "sc") then
-                    return
-                end
-
                 -- The assumption is that any time a floating window's buffer changes, that window should be part of the group at the top of the stack
                 local group = manager.peek()
-
-                -- To update the window we have to iterate through the group until we find it
-                local window_found = false
-                for _, win in ipairs(group.members) do
-                    if win.win == winId then
-                        win.bufnr = bufnr
-                        window_found = true
-                        break
-                    end
-                end
-
+                local win, window_found = manager.query_group(group, winId)
                 -- Assert our previously mentioned assumption
                 assert(window_found, "Window with id " .. win.win .. "was not found in group top of stack.")
+                assert(win.bufnr,
+                    "Window object for id " .. win.win .. " is missing the bufnr field. - " .. vim.inspect(win))
+                win.bufnr = bufnr
             end
         end
     })
@@ -74,7 +63,7 @@ listener.init = function()
 
     -- listener for a new window being created
     vim.api.nvim_create_autocmd("WinNew", {
-        group = vim.api.nvim_create_augroup("shadow-clone-listener", { clear = true }),
+        group = groupid,
         pattern = "*",
         callback = function(opts)
             local group = {}
@@ -84,7 +73,8 @@ listener.init = function()
             -- we only care about floating windows
             if group.config.relative ~= "" then
                 -- return early if the window was created by shadow-clone
-                if vim.api.nvim_win_get_var(group.win, "sc") then
+                local ok, _ = pcall(vim.api.nvim_get_var, group.win, "sc")
+                if ok then
                     return
                 end
 
@@ -124,5 +114,5 @@ end
 
 
 
-listener.init()
--- return listener
+-- listener.init()
+return listener
