@@ -35,9 +35,11 @@ listener.debounce_ms = 50
 
 listener.init = function()
     local groupid = vim.api.nvim_create_augroup("shadow-clone-listener", { clear = true })
-    -- listener for when a window's buffer is switched to a different buffer
-    -- other event options:
-    --  - WinEnter, BufEnter, BufWinEnter
+
+
+
+    -- CURRENT ISSUE: It might be possible for BufEnter to happen before the manager has had a chance to update it's stack. Need to account for this.
+    -- Listener for when a window's buffer is switched to a different buffer.
     vim.api.nvim_create_autocmd("BufEnter", {
         group = groupid,
         pattern = "*",
@@ -54,14 +56,16 @@ listener.init = function()
                 assert(window_found, "Window with id " .. win.win .. "was not found in group top of stack.")
                 assert(win.bufnr,
                     "Window object for id " .. win.win .. " is missing the bufnr field. - " .. vim.inspect(win))
-                win.bufnr = bufnr
+                if win.bufnr ~= bufnr then
+                    win.bufnr = bufnr
+                end
             end
         end
     })
 
 
 
-    -- listener for a new window being created
+    -- Listener for a new window being created.
     vim.api.nvim_create_autocmd("WinNew", {
         group = groupid,
         pattern = "*",
@@ -90,6 +94,7 @@ listener.init = function()
                 -- defer_fn returns our timer object
                 listener.group_timer = vim.defer_fn(function()
                     for _, g in ipairs(listener.group_cache) do
+                        print("!!!!!!!! - ?", vim.inspect(g))
                         manager.manifest_window(g.buf, g.win, g.config, true, config.DEBUG)
                     end
 

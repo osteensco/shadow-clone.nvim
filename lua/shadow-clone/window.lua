@@ -21,21 +21,9 @@ win.create_floating_window = function(opts)
     opts = opts or {}
     local buf = opts.buf or -1
     opts.win_config = opts.win_config or {}
-    local pos = utils.get_pos(config.float_window.position, -1, config.float_window.width, config.float_window.height)
-    local win_config = {
-        relative = "editor",
-        width = config.float_window.width,
-        height = config.float_window.height,
-        col = pos.x,
-        row = pos.y,
-        style = "minimal",
-        border = "rounded", -- TODO add this option to opts.win_config
-        -- TODO
-        -- need highlight group for background
-    }
 
     -- override defaults with provided opts
-    win_config = vim.tbl_deep_extend('force', win_config, opts.win_config)
+    local win_config = vim.tbl_deep_extend('force', config.win_config, opts.win_config)
 
     -- establish buffer
     if vim.api.nvim_buf_is_valid(buf) then
@@ -49,11 +37,10 @@ win.create_floating_window = function(opts)
     -- id window as created by shadow-clone to avoid duplicate stack update via event listener
     vim.api.nvim_win_set_var(winnr, "sc", true)
 
-    -- we cannot rely on the event listener to update the manager's stack when this function is called
+    -- We cannot rely on the event listener to update the manager's stack when this function is called
     -- because the split functionality has no way of knowing to populate the recently emptied group unless
-    -- we explicitly pass in the new_group argument for the manifest_window method. not doing it this way would
-    -- create a new group every time any split function was called.
-
+    -- we explicitly pass in the new_group argument for the manifest_window method. Not doing it this way would
+    -- create a new group every time any split function was called. Thus, the manifest_window method is necessary to call in this function.
     local window = manager.manifest_window(buf, winnr, win_config, opts.newgroup, config.DEBUG)
 
     return window
@@ -75,7 +62,7 @@ local recon_group = function(group)
     local cache = {}
     -- window needs to be removed from group so that the updated WinObj can be properly added back in
     -- the window id is -1 while hidden, when a window is created this id is updated and so the entire object needs to be flushed and readded
-    for i, w in ipairs(group.members) do
+    for _, w in ipairs(group.members) do
         manager.remove_from_group(group, w)
         table.insert(cache, w)
     end

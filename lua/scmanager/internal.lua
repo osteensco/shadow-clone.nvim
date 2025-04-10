@@ -386,7 +386,7 @@ end
 ---@param winid integer
 ---@returns WinObj, boolean
 ops.query_group = function(group, winid)
-    assert(group.members, "the group object should have the memebrs field - " .. vim.inspect(group))
+    assert(group.members, "the group object should have the members field - " .. vim.inspect(group))
     for _, win in ipairs(group.members) do
         if win.win == winid then
             return win, true
