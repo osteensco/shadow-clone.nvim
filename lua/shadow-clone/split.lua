@@ -21,9 +21,8 @@ split.h_split = function()
     local win_w = vim.api.nvim_win_get_width(win)
 
     local group = manager.peek()
-    -- assert(next(group),
-    --     "Peek should not return an empty table when a floating window exists.")
-    if next(group) then
+
+    if group then
         manager.remove_from_group(group, { bufnr = buf, win = win })
     end
     vim.api.nvim_win_hide(win)
@@ -68,7 +67,7 @@ split.v_split = function()
     local group = manager.peek()
     -- assert(next(group),
     --     "Peek should not return an empty table when a floating window exists.")
-    if next(group) then
+    if group then
         manager.remove_from_group(group, { bufnr = buf, win = win })
     end
     vim.api.nvim_win_hide(win)

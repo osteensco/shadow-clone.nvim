@@ -34,9 +34,6 @@ win.create_floating_window = function(opts)
 
     local winnr = vim.api.nvim_open_win(buf, true, win_config)
 
-    -- id window as created by shadow-clone to avoid duplicate stack update via event listener
-    vim.api.nvim_win_set_var(winnr, "sc", true)
-
     -- We cannot rely on the event listener to update the manager's stack when this function is called
     -- because the split functionality has no way of knowing to populate the recently emptied group unless
     -- we explicitly pass in the new_group argument for the manifest_window method. Not doing it this way would
@@ -71,7 +68,6 @@ local recon_group = function(group)
         win.create_floating_window({
             buf = w.bufnr,
             win_config = {
-                win = w.win,
                 height = w.height,
                 width = w.width,
                 row = w.anchor[1],
@@ -85,7 +81,7 @@ end
 -- Move the current group to a hidden state.
 win.hide_group = function()
     local group = manager.peek()
-    if group == {} then
+    if not group then
         return
     end
     decon_group(group)

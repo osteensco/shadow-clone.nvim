@@ -3,6 +3,11 @@ local window = require("shadow-clone.window")
 local config = require("shadow-clone.config")
 local manager = require("scmanager")
 
+
+
+-- TODO
+-- Remove manual autocmd calls.
+-- Tests are passing, but they shouldn't.
 describe("listeners.lua |", function()
     after_each(function()
         manager.clear()

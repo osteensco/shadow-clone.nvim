@@ -109,6 +109,9 @@ end
 ---@return WinGroup
 ops.pop = function()
     local length = ops.get_len()
+    if length < 1 then
+        return nil
+    end
     local group = table.remove(data.stack, length)
     return group
 end
@@ -118,7 +121,7 @@ end
 ops.peek = function()
     local length = ops.get_len()
     if length < 1 then
-        return {}
+        return nil
     end
     return data.stack[length]
 end
@@ -283,7 +286,7 @@ end
 
 --- Group Manipulation
 
----Adds a window to a new group or to the group top of stack
+---Adds a window to a new group or to the group top of stack.
 ---@param buf number
 ---@param winnr number
 ---@param win_config vim.api.keyset.win_config
@@ -318,6 +321,9 @@ ops.manifest_window = function(buf, winnr, win_config, new_group, debug)
         ops.add_to_group(group, window)
     end
     ops.push(group)
+    -- Label window to indicate it's being tracked by shadow-clone
+    -- vim.api.nvim_win_set_var(winnr, "sc", true)
+
 
     ---show additional info if in debug mode
     ops.display_info(group, window, debug)
@@ -344,11 +350,8 @@ end
 ---@param group WinGroup
 ---@param window WinObj
 ops.remove_from_group = function(group, window)
-    assert(window.bufnr,
-        "Window needs to contain the field 'bufnr' in order to search the group for removal. Window - " ..
-        vim.inspect(window))
-    assert(window.win,
-        "Window needs to contain the field 'win' in order to search the group for removal. Window - " ..
+    assert(window.bufnr and window.win,
+        "Window needs to contain the fields 'win' and 'bufnr' in order to search the group for removal. Window - " ..
         vim.inspect(window))
 
     local found = false

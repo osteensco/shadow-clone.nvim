@@ -29,9 +29,9 @@ local config = require('shadow-clone.config')
 
 local listener = {}
 
-listener.group_cache = {}
-listener.group_timer = nil
-listener.debounce_ms = 50
+local group_cache = {}
+local group_timer = nil
+local debounce_ms = 50
 
 listener.init = function()
     local groupid = vim.api.nvim_create_augroup("shadow-clone-listener", { clear = true })
@@ -53,6 +53,11 @@ listener.init = function()
             if win_config.relative ~= "" then
                 -- The assumption is that any time a floating window's buffer changes, that window should be part of the group at the top of the stack
                 local group = manager.peek()
+                print("!!!!!! - BufEnter - ", vim.inspect(group))
+                -- if there's nothing then it's a new window and doesn't need to be checked for buffer change
+                if not group then
+                    return
+                end
                 local win, window_found = manager.query_group(group, winId)
                 -- Assert our previously mentioned assumption
                 assert(window_found, "Window with id " .. win.win .. "was not found in group top of stack.")
@@ -72,38 +77,36 @@ listener.init = function()
         group = groupid,
         pattern = "*",
         callback = function(opts)
-            local group = {}
-            group.win = vim.api.nvim_get_current_win()
-            group.buf = vim.api.nvim_get_current_buf()
-            group.config = vim.api.nvim_win_get_config(group.win)
+            print("!!!!!!!! - WinNew - ?", vim.inspect(w))
+            local window = {}
+            window.win = vim.api.nvim_get_current_win()
+            window.buf = vim.api.nvim_get_current_buf()
+            window.config = vim.api.nvim_win_get_config(window.win)
             -- we only care about floating windows
-            if group.config.relative ~= "" then
-                -- return early if the window was created by shadow-clone
-                local ok, _ = pcall(vim.api.nvim_get_var, group.win, "sc")
-                if ok then
-                    return
-                end
-
-                table.insert(listener.group_cache, group)
+            if window.config.relative ~= "" then
+                table.insert(group_cache, window)
 
                 -- we want to check if a timer is already running and reset it
                 -- this creates a 'timeout' rule from the last opened window to close off the current group that is being populated
-                if listener.group_timer then
-                    listener.group_timer:stop()
-                    listener.group_timer:close()
+                if group_timer then
+                    group_timer:stop()
+                    group_timer:close()
                 end
 
                 -- defer_fn returns our timer object
-                listener.group_timer = vim.defer_fn(function()
-                    for _, g in ipairs(listener.group_cache) do
-                        print("!!!!!!!! - ?", vim.inspect(g))
-                        manager.manifest_window(g.buf, g.win, g.config, true, config.DEBUG)
+                group_timer = vim.defer_fn(function()
+                    for i, w in ipairs(group_cache) do
+                        local newgroup = false
+                        if i == 1 then
+                            newgroup = true
+                        end
+                        manager.manifest_window(w.buf, w.win, w.config, newgroup, config.DEBUG)
                     end
 
                     -- reset cache and timer
-                    listener.group_cache = {}
-                    listener.group_timer = nil
-                end, listener.debounce_ms)
+                    group_cache = {}
+                    group_timer = nil
+                end, debounce_ms)
             end
         end
     })
@@ -121,5 +124,4 @@ end
 
 
 
--- listener.init()
 return listener

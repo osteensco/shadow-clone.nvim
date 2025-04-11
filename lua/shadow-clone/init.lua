@@ -5,6 +5,7 @@ local default_config = require("shadow-clone.config")
 local commands = require("shadow-clone.commands")
 local keymaps = require("shadow-clone.keymaps")
 local utils = require("shadow-clone.utils")
+local listeners = require("shadow-clone.listeners")
 
 
 local M = {}
@@ -49,13 +50,8 @@ end
 commands.init()
 -- Set keymaps
 keymaps.init()
-
-
-
-
-
-
-
+-- Set listeners
+listeners.init()
 
 
 
