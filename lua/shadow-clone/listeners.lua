@@ -36,9 +36,11 @@ listener.debounce_ms = 50
 listener.init = function()
     local groupid = vim.api.nvim_create_augroup("shadow-clone-listener", { clear = true })
 
-
-
+    -- TODO
     -- CURRENT ISSUE: It might be possible for BufEnter to happen before the manager has had a chance to update it's stack. Need to account for this.
+
+
+
     -- Listener for when a window's buffer is switched to a different buffer.
     vim.api.nvim_create_autocmd("BufEnter", {
         group = groupid,

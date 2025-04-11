@@ -38,7 +38,7 @@ M.setup = function(config)
     config = config or {}
     M.config = vim.tbl_deep_extend('force', M.config, config)
     -- Set anchor defaults based on position value
-    local pos = utils.get_pos(config.position, -1, config.win_config.width, config.win_config.height)
+    local pos = utils.get_pos(M.config.position, -1, M.config.win_config.width, M.config.win_config.height)
     M.config.win_config.col = pos.x
     M.config.win_config.row = pos.y
 end
