@@ -109,6 +109,9 @@ end
 ---@return WinGroup
 ops.pop = function()
     local length = ops.get_len()
+    if length < 1 then
+        return nil
+    end
     local group = table.remove(data.stack, length)
     return group
 end
@@ -118,7 +121,7 @@ end
 ops.peek = function()
     local length = ops.get_len()
     if length < 1 then
-        return {}
+        return nil
     end
     return data.stack[length]
 end
@@ -245,6 +248,7 @@ ops.hide_top_group = function()
 end
 
 ---Move a group from the hidden stack to the top of the main stack
+---@param group WinGroup
 ops.unhide_group = function(group)
     local grp = nil
     for i, g in ipairs(data.hidden.stack) do
@@ -267,11 +271,8 @@ ops.toggle_last_accessed_group = function()
     local occupied = ops.hidden_toggle_slot_occupied()
 
     if occupied then
-        group = table.remove(data.hidden.toggle.slot, 1)
-        -- Add an empty new group to the main stack.
-        -- This will be hydrated with the group this function returns by window.recon_group.
-        local newgrp = ops.new_group()
-        ops.push(newgrp)
+        group = table.remove(data.hidden.toggle.slot)
+        ops.push(group)
     else
         group = ops.pop()
         group.zindex = 0
@@ -285,6 +286,51 @@ end
 
 --- Group Manipulation
 
+---Adds a window to a new group or to the group top of stack.
+---@param buf number
+---@param winnr number
+---@param win_config vim.api.keyset.win_config
+---@param new_group boolean
+---@return WinObj
+ops.manifest_window = function(buf, winnr, win_config, new_group, debug)
+    -- TODO
+    --  - add tests
+
+    ---@type WinObj
+    local window = {
+        bufnr = buf,
+        win = winnr,
+        anchor = vim.api.nvim_win_get_position(winnr),
+        height = win_config.height,
+        width = win_config.width,
+    }
+
+    ---@type WinGroup
+    local group = ops.new_group()
+    if not new_group then
+        -- use top group unless stack is empty then use newly created group
+        local g = ops.pop()
+        group = g or group
+    end
+
+    -- check top group for existence of window
+    -- manifest_window can be called when a window moves from a hidden state,
+    -- in such a case it is already on the main stack
+    local _, exists = ops.query_group(group, winnr)
+    if not exists then
+        ops.add_to_group(group, window)
+    end
+    ops.push(group)
+    -- Label window to indicate it's being tracked by shadow-clone
+    -- vim.api.nvim_win_set_var(winnr, "sc", true)
+
+
+    ---show additional info if in debug mode
+    ops.display_info(group, window, debug)
+
+    return window
+end
+
 ---creates a new WinGroup
 ---@return WinGroup
 ops.new_group = function()
@@ -295,9 +341,7 @@ end
 ---@param group WinGroup
 ---@param window WinObj
 ops.add_to_group = function(group, window)
-    assert(group.members,
-        "A group attempting to be added to should have two fields (members, zindex), got - " .. vim.inspect(group))
-    assert(group.zindex,
+    assert(group.members and group.zindex,
         "A group attempting to be added to should have two fields (members, zindex), got - " .. vim.inspect(group))
     table.insert(group.members, window)
 end
@@ -306,11 +350,8 @@ end
 ---@param group WinGroup
 ---@param window WinObj
 ops.remove_from_group = function(group, window)
-    assert(window.bufnr,
-        "Window needs to contain the field 'bufnr' in order to search the group for removal. Window - " ..
-        vim.inspect(window))
-    assert(window.win,
-        "Window needs to contain the field 'win' in order to search the group for removal. Window - " ..
+    assert(window.bufnr and window.win,
+        "Window needs to contain the fields 'win' and 'bufnr' in order to search the group for removal. Window - " ..
         vim.inspect(window))
 
     local found = false
@@ -328,7 +369,6 @@ ops.remove_from_group = function(group, window)
 
     if #group.members == 0 then
         -- assumption is this would only get called on group that is top of stack
-        -- will need adjusting if not always the case
         ops.pop()
     end
 end
@@ -344,6 +384,38 @@ end
 
 
 -- Helpers
+
+---@param group WinGroup
+---@param winid integer
+---@returns WinObj, boolean
+ops.query_group = function(group, winid)
+    assert(group.members, "the group object should have the members field - " .. vim.inspect(group))
+    for _, win in ipairs(group.members) do
+        if win.win == winid then
+            return win, true
+        end
+    end
+    return nil, false
+end
+
+---@param grp WinGroup
+---@param window WinObj
+---@param debug boolean
+ops.display_info = function(grp, window, debug)
+    if debug then
+        local testconfig = {
+            title = "group: " ..
+                grp.zindex ..
+                " win: " ..
+                window.win ..
+                " - x: " ..
+                window.anchor[2] .. ", y: " .. window.anchor[1] ..
+                "| height: " .. window.height .. ", width: " .. window.width,
+            title_pos = "center"
+        }
+        vim.api.nvim_win_set_config(window.win, testconfig)
+    end
+end
 
 ---@return string
 ops.inspect = function()

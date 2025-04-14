@@ -1,21 +1,21 @@
-local config = require("shadow-clone.config")
 local manager = require('scmanager')
 
 
 local utils = {}
 
--- ---@enum WindowPosition
--- local position = {
---     center = "center"
--- }
 
--- Generates an anchor for a window based on position, height, and width.
--- Anchor is a table containing cols and rows (represented as x, y) that neovim uses to anchor a window.
+
+---Generates an anchor for a window based on position, height, and width.
+---Anchor is a table containing cols and rows (represented as x, y) that neovim uses to anchor a window.
+---@param pos string
+---@param win number
+---@param width number
+---@param height number
+---@return Anchor
 utils.get_pos = function(pos, win, width, height)
     local winanchor = {}
-    -- TODO
-    --  - remove valid window option if it never gets used anywhere
-    if vim.api.nvim_win_is_valid(win) then -- currently, this portion isn't getting used
+    -- get_pos will likely need to be used for any sort of moving the window around functionality
+    if vim.api.nvim_win_is_valid(win) then
         winanchor = vim.api.nvim_win_get_position(win)
     else
         winanchor = { vim.o.lines, vim.o.columns }
@@ -78,23 +78,10 @@ utils.get_types = function(window)
     return win_type, buf_type
 end
 
--- Display information helpful to debuggin on floating windows.
-utils.debug_display = function(grp, window)
-    if require('shadow-clone').config.DEBUG then
-        local testconfig = {
-            title = "group: " ..
-                grp.zindex ..
-                " win: " ..
-                window.win ..
-                " - x: " ..
-                window.anchor[2] .. ", y: " .. window.anchor[1] ..
-                "| height: " .. window.height .. ", width: " .. window.width,
-            title_pos = "center"
-        }
-        vim.api.nvim_win_set_config(window.win, testconfig)
-    end
-end
+-- Display information helpful to debuging on shadow-clone's floating windows.
+utils.debug_display = manager.display_info
 
+-- Display shadow-clone's data structure for debugging.
 utils.inspect = manager.inspect
 utils.inspect_hidden = manager.hidden_inspect
 

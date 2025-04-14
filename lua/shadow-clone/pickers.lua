@@ -13,7 +13,7 @@ local window = require("shadow-clone.window")
 local pick = {}
 
 
-
+-- We use markdown to get really basic highlighting for the previewed contents.
 local function generate_preview_contents(group)
     if not group or not group.members then return "No windows in this group" end
 

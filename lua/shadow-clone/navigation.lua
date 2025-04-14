@@ -22,8 +22,8 @@ nav.bubble_down = function()
     local win = vim.api.nvim_get_current_win()
     if utils.is_floating(win) then
         local group = manager.peek()
-        assert(next(group),
-            "Peek should not return an empty table when a floating window exists.")
+        assert(group,
+            "Peek should not return nil when a floating window exists.")
         manager.remove_from_group(group, { bufnr = buf, win = win })
         vim.api.nvim_win_hide(win)
         vim.api.nvim_set_current_buf(buf)
@@ -36,8 +36,8 @@ nav.bubble_down_h = function()
     local win = vim.api.nvim_get_current_win()
     if utils.is_floating(win) then
         local group = manager.peek()
-        assert(next(group),
-            "Peek should not return an empty table when a floating window exists.")
+        assert(group,
+            "Peek should not return nil when a floating window exists.")
         manager.remove_from_group(group, { bufnr = buf, win = win })
         vim.api.nvim_win_hide(win)
         vim.cmd("split")
@@ -51,8 +51,8 @@ nav.bubble_down_v = function()
     local win = vim.api.nvim_get_current_win()
     if utils.is_floating(win) then
         local group = manager.peek()
-        assert(next(group),
-            "Peek should not return an empty table when a floating window exists.")
+        assert(group,
+            "Peek should not return nil when a floating window exists.")
         manager.remove_from_group(group, { bufnr = buf, win = win })
         vim.api.nvim_win_hide(win)
         vim.cmd("vsplit")
@@ -74,8 +74,8 @@ local function move_to_closest(get_distance, is_closest, is_farthest)
     if utils.is_floating(curr_win) then
         ---@type WinGroup
         local group = manager.peek()
-        assert(next(group),
-            "Peek() should not return an empty table when a floating window exists.")
+        assert(group,
+            "Peek should not return nil when a floating window exists.")
 
         ---@type WindowDistance
         local closest, farthest = nil, nil

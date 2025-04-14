@@ -5,6 +5,7 @@ local default_config = require("shadow-clone.config")
 local commands = require("shadow-clone.commands")
 local keymaps = require("shadow-clone.keymaps")
 local utils = require("shadow-clone.utils")
+local listeners = require("shadow-clone.listeners")
 
 
 local M = {}
@@ -37,6 +38,10 @@ M.debug = {
 M.setup = function(config)
     config = config or {}
     M.config = vim.tbl_deep_extend('force', M.config, config)
+    -- Set anchor defaults based on position value
+    local pos = utils.get_pos(M.config.position, -1, M.config.win_config.width, M.config.win_config.height)
+    M.config.win_config.col = pos.x
+    M.config.win_config.row = pos.y
 end
 
 
@@ -45,13 +50,8 @@ end
 commands.init()
 -- Set keymaps
 keymaps.init()
-
-
-
-
-
-
-
+-- Set listeners
+listeners.init()
 
 
 

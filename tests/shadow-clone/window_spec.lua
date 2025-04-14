@@ -5,6 +5,7 @@ local mock = require('luassert.mock')
 local stub = require('luassert.stub')
 
 local windows = {}
+local window_vars = {}
 local buf_counter = 1
 local win_counter = 1
 
@@ -39,6 +40,10 @@ describe('window.lua', function()
         end)
         stub(vim.api, "nvim_win_get_position", function(winnr) return windows[winnr].pos end)
         stub(vim.api, "nvim_win_hide", function() if win_counter > 0 then win_counter = win_counter - 1 end end)
+        stub(vim.api, "nvim_win_set_var", function(winnr, name, val)
+            window_vars[winnr] = {}
+            window_vars[winnr][name] = val
+        end)
         manager.clear()
     end)
 
@@ -163,7 +168,7 @@ describe('window.lua', function()
 
             win.unhide_group(expected)
 
-            assert.are.same(vim.inspect({ expected }), vim.inspect(manager.peek()))
+            assert.are.same(vim.inspect(expected), vim.inspect(manager.peek()))
         end)
     end)
 
@@ -205,7 +210,12 @@ describe('window.lua', function()
                 }
             }
 
-            local expected = vim.inspect({ manager.peek() })
+            -- group repopulation process after a toggle reverses the order of its members
+            local grp = manager.peek()
+            local expected = { id = 1, members = {}, zindex = 1 }
+            for _, w in ipairs(grp.members) do
+                table.insert(expected.members, 1, w)
+            end
 
 
             -- first toggle call
@@ -227,8 +237,8 @@ describe('window.lua', function()
             assert.equals(1, manager.get_len(),
                 "main stack should be length 1 after second toggle, " ..
                 " toggle slot - " .. manager.hidden_inspect().toggle.slot .. ", main stack - " .. manager.inspect())
-            assert.equals(expected, manager.inspect(),
-                "main stack should contain group captured in 'expected'")
+            assert.equals(vim.inspect({ expected }), manager.inspect(),
+                "main stack should contain group captured in 'expected' after second toggle call")
         end)
     end)
 

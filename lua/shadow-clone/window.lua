@@ -6,6 +6,8 @@ local utils = require('shadow-clone.utils')
 
 local win = {}
 
+
+
 ---@class CreateFloatOpts
 ---@field buf? integer
 ---@field newgroup? boolean
@@ -19,21 +21,9 @@ win.create_floating_window = function(opts)
     opts = opts or {}
     local buf = opts.buf or -1
     opts.win_config = opts.win_config or {}
-    local pos = utils.get_pos(config.float_window.position, -1, config.float_window.width, config.float_window.height)
-    local win_config = {
-        relative = "editor",
-        width = config.float_window.width,
-        height = config.float_window.height,
-        col = pos.x,
-        row = pos.y,
-        style = "minimal",
-        border = "rounded",
-        -- TODO
-        -- need highlight group for background
-    }
 
     -- override defaults with provided opts
-    win_config = vim.tbl_deep_extend('force', win_config, opts.win_config)
+    local win_config = vim.tbl_deep_extend('force', config.win_config, opts.win_config)
 
     -- establish buffer
     if vim.api.nvim_buf_is_valid(buf) then
@@ -44,33 +34,14 @@ win.create_floating_window = function(opts)
 
     local winnr = vim.api.nvim_open_win(buf, true, win_config)
 
-    ---@type WinObj
-    local window = {
-        bufnr = buf,
-        win = winnr,
-        anchor = vim.api.nvim_win_get_position(winnr),
-        height = win_config.height,
-        width = win_config.width,
-    }
-
-    ---@type WinGroup
-    local group = manager.new_group()
-    if not opts.newgroup then
-        local g = manager.pop()
-        group = g or group
-    end
-    manager.add_to_group(group, window)
-    manager.push(group)
-
-    ---show additional info if in debug mode
-    local grp = manager.peek()
-    utils.debug_display(grp, window)
+    -- We cannot rely on the event listener to update the manager's stack when this function is called
+    -- because the split functionality has no way of knowing to populate the recently emptied group unless
+    -- we explicitly pass in the new_group argument for the manifest_window method. Not doing it this way would
+    -- create a new group every time any split function was called. Thus, the manifest_window method is necessary to call in this function.
+    local window = manager.manifest_window(buf, winnr, win_config, opts.newgroup, config.DEBUG)
 
     return window
 end
-
-
-
 
 
 ---Deconstruct a group's windows.
@@ -84,7 +55,16 @@ end
 ---Reconstruct a group's windows from a WinGroup object.
 ---@param group WinGroup
 local recon_group = function(group)
+    -- init a temporary cache
+    local cache = {}
+    -- window needs to be removed from group so that the updated WinObj can be properly added back in
+    -- the window id is -1 while hidden, when a window is created this id is updated and so the entire object needs to be flushed and readded
     for _, w in ipairs(group.members) do
+        manager.remove_from_group(group, w)
+        table.insert(cache, w)
+    end
+    -- creating a floating window will repopulate our group in the stack via manifest_window
+    for _, w in ipairs(cache) do
         win.create_floating_window({
             buf = w.bufnr,
             win_config = {
@@ -101,7 +81,7 @@ end
 -- Move the current group to a hidden state.
 win.hide_group = function()
     local group = manager.peek()
-    if group == {} then
+    if not group then
         return
     end
     decon_group(group)
