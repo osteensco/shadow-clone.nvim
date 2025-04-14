@@ -1,3 +1,6 @@
+<h3>NOTICE:</h3>
+<p>I've stopped development on this project for the time being. If you find this plugin interesting and would like to have the funcitonality this plugin promises I'm happy to pick it back up. For now there doesn't seem to be a strong demand for this type of thing.</p>
+
 <h3>What is this?</h3>
 
 <p>
