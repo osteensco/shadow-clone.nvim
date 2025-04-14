@@ -14,7 +14,7 @@ There is also an ad hoc toggle slot available to use that is cleared after toggl
 </p>
 
 <h2></h2>
-This is a WIP. See TODO file for specific features I'm working on.
+This is a WIP. You may experience bugs. See TODO file for specific features I'm working on.
 
 No setup function required, install with your favorite package manager.
 ```lua
@@ -30,13 +30,19 @@ You can of course optionally pass your own config to the setup function. More co
 ```lua
 ---defaults
 local config = {
-    float_window = { -- fields that can be passed to neovim's win_config table on window creation
-        position = 'center', 
+    win_config = {
+        relative = "editor",
         width = math.ceil(math.min(vim.o.columns, math.max(80, vim.o.columns - 10))),
         height = math.ceil(math.min(vim.o.lines, math.max(20, vim.o.lines - 5))),
+        col = 0, -- This will be set by the setup function depending on what 'position' is set to
+        row = 0, -- This will be set by the setup function depending on what 'position' is set to
+        style = "minimal",
+        border = "rounded",
     },
+    position = 'center',
     DEBUG = false,
 }
+
 
 ```
 
